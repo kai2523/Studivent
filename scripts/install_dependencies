@@ -22,7 +22,7 @@ else
 fi
 
 echo "📄 Dateien im aktuellen Verzeichnis:"
-ls -la
+ls
 
 if [ -f "package.json" ]; then
   echo "📦 package.json gefunden – führe npm install aus..."
