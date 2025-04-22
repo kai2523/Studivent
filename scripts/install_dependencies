@@ -10,7 +10,7 @@ fi
 
 cd /var/www/html
 
-if [ -f "package.json" ]; then
+if [ -f "../package.json" ]; then
   echo "✅ package.json gefunden – npm install wird ausgeführt..."
   npm install
 else
