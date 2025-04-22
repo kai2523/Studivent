@@ -1,1 +1,20 @@
-npm run start
+#!/bin/bash
+
+echo "🚀 Starte start_server Skript..."
+cd /var/www/html || {
+  echo "❌ /var/www/html nicht gefunden"
+  exit 1
+}
+
+echo "📂 Aktuelles Verzeichnis: $(pwd)"
+echo "📄 Dateien:"
+ls -la
+
+if [ -f "package.json" ]; then
+  echo "📦 package.json gefunden – starte npm..."
+  sudo npm start
+else
+  echo "⚠️  package.json nicht gefunden – npm start übersprungen"
+fi
+
+echo "✅ start_server abgeschlossen."

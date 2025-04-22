@@ -1,12 +1,34 @@
 #!/bin/bash
-set -e
 
-echo "🚀 Starte install_dependencies…"
+echo "🚀 Starte install_dependencies Skript..."
 
-sudo mkdir -p /var/www/html
-sudo chown ubuntu:ubuntu /var/www/html
+echo "📂 Aktuelles Verzeichnis (vor mkdir): $(pwd)"
 
-cd /var/www/html
+mkdir -p /var/www/html
+echo "📁 Verzeichnis /var/www/html wurde erstellt (falls nicht vorhanden)."
 
-echo "📦 Führe npm install aus…"
-npm install
+cd /var/www/html || {
+  echo "❌ Fehler: /var/www/html existiert nicht oder konnte nicht betreten werden."
+  exit 1
+}
+echo "📂 Neues Arbeitsverzeichnis: $(pwd)"
+
+if ! command -v npm &> /dev/null; then
+  echo "📦 Node.js wird installiert..."
+  curl -fsSL https://deb.nodesource.com/setup_18.x | sudo -E bash -
+  sudo apt install -y nodejs
+else
+  echo "✅ Node.js ist bereits installiert. Version: $(npm -v)"
+fi
+
+echo "📄 Dateien im aktuellen Verzeichnis:"
+ls
+
+if [ -f "package.json" ]; then
+  echo "📦 package.json gefunden – führe npm install aus..."
+  sudo npm install
+else
+  echo "⚠️  Keine package.json im aktuellen Verzeichnis gefunden – npm install wird übersprungen."
+fi
+
+echo "✅ install_dependencies abgeschlossen."
