@@ -1,12 +1,8 @@
 version: 0.0
 os: linux
 files:
-  - source: /index.html
+  - source: /
     destination: /var/www/html/
-  - source: /package.json
-    destination: /var/www/html/
-  - source: /scripts/
-    destination: /scripts/
 hooks:
   BeforeInstall:
     - location: scripts/install_dependencies
