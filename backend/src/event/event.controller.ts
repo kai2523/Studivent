@@ -1,0 +1,49 @@
+import { Body, Controller, Delete, Get, NotFoundException, Param, ParseIntPipe, Patch, Post } from '@nestjs/common';
+import { EventService } from './event.service';
+import { CreateEventDto, EditEventDto } from './dto';
+
+@Controller('events')
+export class EventController {
+    constructor(private eventService: EventService) {}
+  
+    @Post()
+    create(@Body() createEventDto: CreateEventDto) {
+      return this.eventService.create(createEventDto);
+    }
+  
+    @Get()
+    findAll() {
+      return this.eventService.findAll();
+    }
+  
+    @Get(':id')
+    async findOne(@Param('id', ParseIntPipe) id: number) {
+      const event = await this.eventService.findOne(id);
+      if (!event) {
+        throw new NotFoundException(`Event #${id} not found`);
+      }
+      return event;
+    }
+  
+    @Patch(':id')
+    async update(
+      @Param('id', ParseIntPipe) id: number,
+      @Body() editEventDto: EditEventDto,
+    ) {
+      const updated = await this.eventService.update(id, editEventDto);
+      if (!updated) {
+        throw new NotFoundException(`Event #${id} not found`);
+      }
+      return updated;
+    }
+  
+    @Delete(':id')
+    async remove(@Param('id', ParseIntPipe) id: number) {
+      const deleted = await this.eventService.remove(id);
+      if (!deleted) {
+        throw new NotFoundException(`Event #${id} not found`);
+      }
+      return { message: 'Event deleted successfully' };
+    }
+  }
+  
