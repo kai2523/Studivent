@@ -1,1 +1,16 @@
-npm install
+#!/bin/bash
+
+if ! command -v npm &> /dev/null; then
+  echo "Node.js wird installiert..."
+  curl -fsSL https://deb.nodesource.com/setup_18.x | sudo -E bash -
+  sudo apt install -y nodejs
+fi
+
+cd /var/www/html
+
+if [ -f "package.json" ]; then
+  echo "📦 package.json gefunden – npm install wird ausgeführt..."
+  npm install
+else
+  echo "⚠️  Keine package.json gefunden – npm install wird übersprungen"
+fi
