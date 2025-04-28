@@ -36,8 +36,16 @@ model Ticket {
   createdAt   DateTime @default(now())
   ownerEmail  String
   bookedAt    DateTime @default(now())
+
+  qrCodePath   String?  @map("qr_code_path")   
+  pdfPath      String?  @map("pdf_path")
+
   event       Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
   eventId     Int
+
+  @@index([eventId])
+  @@map("tickets")
+
 }
 
 model Location {
