@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateEventDto, EditEventDto } from './dto';
 
@@ -69,8 +69,7 @@ export class EventService {
           console.error(err);
           return null;
         }
-    }
-      
+    } 
 
     async remove(id: number) {
         try {
@@ -81,5 +80,21 @@ export class EventService {
         } catch {
             return false;
         }
+    }
+
+    async findTicketsForEvent(eventId: number, { page, size }: { page: number; size: number }) {
+
+      const eventExists = await this.prisma.event.findUnique({
+        where: { id: eventId },
+        select: { id: true },
+      });
+      if (!eventExists) throw new NotFoundException(`Event #${eventId} not found`);
+
+      return this.prisma.ticket.findMany({
+        where: { eventId },
+        skip: (page - 1) * size,
+        take: size,
+        orderBy: { createdAt: 'asc' },
+      });
     }
 }

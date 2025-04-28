@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, NotFoundException, Param, ParseIntPipe, Patch, Post } from '@nestjs/common';
+import { Body, Controller, Delete, Get, NotFoundException, Param, ParseIntPipe, Patch, Post, Query } from '@nestjs/common';
 import { EventService } from './event.service';
 import { CreateEventDto, EditEventDto } from './dto';
 
@@ -44,6 +44,15 @@ export class EventController {
         throw new NotFoundException(`Event #${id} not found`);
       }
       return { message: 'Event deleted successfully' };
+    }
+
+    @Get(':id/tickets')
+    async listTickets(
+      @Param('id', ParseIntPipe) id: number,
+      @Query('page') page = 1,
+      @Query('size') size = 25,
+    ) {
+      return this.eventService.findTicketsForEvent(id, { page, size });
     }
   }
   
