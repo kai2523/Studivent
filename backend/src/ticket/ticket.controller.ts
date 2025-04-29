@@ -1,6 +1,6 @@
 import { Body, Controller, Get, Param, ParseIntPipe, Post, Res, StreamableFile } from '@nestjs/common';
 import { TicketService } from './ticket.service';
-import { CreateTicketDto } from './dto';
+import { CreateTicketDto, ValidateTicketDto } from './dto';
 import { Response } from 'express';
 import { StorageService } from '../infra/storage/storage.interface';
 
@@ -37,6 +37,10 @@ export class TicketController {
       return this.ticketService.findOne(id);
     }
 
+    @Post('validate')
+    validate(@Body() dto: ValidateTicketDto) {
+      return this.ticketService.validate(dto.code);
+    }
 
 }
 

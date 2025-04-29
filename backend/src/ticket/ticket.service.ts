@@ -39,6 +39,7 @@ export class TicketService {
             data: { ownerEmail, eventId },
             select: {
               id: true,
+              code: true,
               createdAt: true,
               bookedAt: true,
               ownerEmail: true,
@@ -52,7 +53,7 @@ export class TicketService {
 
     await Promise.all(
       freshTickets.map(async (ticket) => {
-        const qrPng = await this.qr.png(`ticket:${ticket.id}`);
+        const qrPng = await this.qr.png(ticket.code);
         const pdfBytes = await this.pdf.build({
           qr: qrPng,
           eventTitle: event.title,
@@ -72,7 +73,18 @@ export class TicketService {
       }),
     );
 
-    return { quantity, tickets: freshTickets };
+    return {
+      quantity,
+      tickets: freshTickets.map((t) => ({
+        id: t.id,
+        code: t.code,
+        ownerEmail: t.ownerEmail,
+        createdAt: t.createdAt,
+        bookedAt: t.bookedAt,
+        eventId: t.eventId,
+      })),
+    };
+    
   }
 
   async findOne(id: number) {
@@ -80,6 +92,7 @@ export class TicketService {
       where: { id },
       select: {
         id: true,
+        code: true,
         createdAt: true,
         bookedAt: true,
         ownerEmail: true,
@@ -102,6 +115,30 @@ export class TicketService {
     }
 
     return ticket.pdfPath;
+  }
+
+  async validate(code: string) {
+    const ticket = await this.prisma.ticket.findUnique({ where: { code } });
+  
+    if (!ticket) {
+      throw new BadRequestException('Ticket not found');
+    }
+  
+    if (ticket.validatedAt !== null) {
+      throw new BadRequestException('Ticket already validated');
+    }
+  
+    await this.prisma.ticket.update({
+      where: { id: ticket.id },
+      data:  { validatedAt: new Date() },
+    });
+  
+    return {
+      ok        : true,
+      ticketId  : ticket.id,
+      owner     : ticket.ownerEmail,
+      validated : new Date(),
+    };
   }
 
 }
