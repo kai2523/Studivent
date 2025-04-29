@@ -17,6 +17,7 @@ describe('App e2e', () => {
     app.useGlobalPipes(
       new ValidationPipe({
         whitelist: true,
+        transform: true
       }),
     );
     await app.init();
@@ -46,6 +47,29 @@ describe('App e2e', () => {
       latitude: 52.52,
       longitude: 13.405,
     },
+  };
+
+  const ticketEvent = {
+    title: 'Ticket Test Event',
+    description: 'Event created for ticket tests',
+    date: new Date().toISOString(),
+    contact: 'tickets@test.com',
+    imageUrl: 'https://example.com/ticket-event.jpg',
+    totalTickets: 100,
+    location: {
+      name: 'Ticket Venue',
+      address: '1 Ticket Way',
+      city: 'TicketCity',
+      country: 'TicketLand',
+      latitude: 40.7128,
+      longitude: -74.0060,
+    },
+  };
+
+  const mockTicket = {
+    eventId: '$S{eventId}',
+    quantity: 2,
+    ownerEmail: 'buyer@test.com',
   };
 
   describe('Event', () => {
@@ -126,6 +150,107 @@ describe('App e2e', () => {
           .expectStatus(404);
       });
     });
+  });
+
+  describe('Ticket', () => {
+
+    describe('Create prerequisite Event', () => {
+      it('should create an event to attach tickets to', () => {
+        return pactum
+          .spec()
+          .post('/events')
+          .withBody(ticketEvent)
+          .expectStatus(201)
+          .stores('eventId', 'id');
+      });
+    });
+
+    describe('Create Ticket', () => {
+      it('should create one ticket', () => {
+        return pactum
+          .spec()
+          .post('/tickets')
+          .withBody(mockTicket)
+          .expectStatus(201)
+          .expectJsonLike({
+            quantity: mockTicket.quantity,
+            tickets: [
+              {
+                eventId: '$S{eventId}',
+                ownerEmail: mockTicket.ownerEmail,
+              },
+            ],
+          })
+          .stores('ticketId', 'tickets[0].id') 
+          .stores('ticketCode', 'tickets[0].code');
+      });
+    });
+
+    describe('Get Ticket', () => {
+      it('should return the newly created ticket', () => {
+        return pactum
+          .spec()
+          .get('/tickets/{id}')
+          .withPathParams('id', '$S{ticketId}')
+          .expectStatus(200)
+          .expectJsonLike({
+            id: '$S{ticketId}',
+            eventId: '$S{eventId}',
+            ownerEmail: mockTicket.ownerEmail,
+          });
+      });
+    
+      it('should return 404 for a non-existing ticket', () => {
+        return pactum
+          .spec()
+          .get('/tickets/999999')
+          .expectStatus(404);
+      });
+    });
+
+    describe('Validate Ticket', () => {
+      it('should successfully validate the ticket', () => {
+        return pactum
+          .spec()
+          .post('/tickets/validate')
+          .withBody({ code: '$S{ticketCode}' })
+          .expectStatus(201)
+          .expectJsonLike({
+            ok: true,
+            ticketId: '$S{ticketId}',
+          });
+      });
+    
+      it('should not validate the ticket again', () => {
+        return pactum
+          .spec()
+          .post('/tickets/validate')
+          .withBody({ code: '$S{ticketCode}' })
+          .expectStatus(400) 
+          .expectBodyContains('Ticket already validated');
+      });
+    
+      it('should fail to validate a non-existing code', () => {
+        return pactum
+          .spec()
+          .post('/tickets/validate')
+          .withBody({ code: '00000000-0000-0000-0000-000000000000' }) 
+          .expectStatus(400)
+          .expectBodyContains('Ticket not found');
+      });
+    });
+    
+    describe('Get Ticket PDF', () => {
+      it('should return the ticket PDF file', () => {
+        return pactum
+          .spec()
+          .get('/tickets/{id}/pdf')
+          .withPathParams('id', '$S{ticketId}')
+          .expectStatus(200)
+          .expectHeader('content-type', 'application/pdf');
+      });
+    });    
+
   });
 
 });
