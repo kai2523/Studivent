@@ -22,15 +22,15 @@ export class TicketController {
       @Res({ passthrough: true }) res: Response,
     ): Promise<StreamableFile> {
       const path = await this.ticketService.getPdfPath(id);
-  
+      const fileBuffer = await this.storage.get(path);
+    
       res.set({
         'Content-Type': 'application/pdf',
         'Content-Disposition': `inline; filename="ticket-${id}.pdf"`,
       });
-  
-      return this.storage.get(path);    
-    }
-  
+    
+      return new StreamableFile(fileBuffer);
+    }    
 
     @Get(':id')
     findOne(@Param('id', ParseIntPipe) id: number) {
@@ -43,4 +43,3 @@ export class TicketController {
     }
 
 }
-
