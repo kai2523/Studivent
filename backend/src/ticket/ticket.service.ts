@@ -1,4 +1,3 @@
-// src/modules/ticket/ticket.service.ts
 import {
   BadRequestException,
   Injectable,
