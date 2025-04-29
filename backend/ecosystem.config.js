@@ -15,7 +15,7 @@ module.exports = {
       repo : 'GIT_REPOSITORY',
       path : 'DESTINATION_PATH',
       'pre-deploy-local': '',
-      'post-deploy' : 'npm install && pm2 reload ecosystem.config.js --env production',
+      'post-deploy' : 'yarn install --production && yarn prisma migrate deploy && yarn build && pm2 reload studivent-api --update-env && pm2 save',
       'pre-setup': ''
     }
   }
