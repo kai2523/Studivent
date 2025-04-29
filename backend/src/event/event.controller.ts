@@ -1,7 +1,9 @@
-import { Body, Controller, Delete, Get, NotFoundException, Param, ParseIntPipe, Patch, Post, Query } from '@nestjs/common';
+import { Body, Controller, Delete, Get, NotFoundException, Param, ParseIntPipe, Patch, Post, Query, UseGuards } from '@nestjs/common';
 import { EventService } from './event.service';
 import { CreateEventDto, EditEventDto } from './dto';
+import { ApiKeyGuard } from 'src/auth/api-key.guard';
 
+@UseGuards(ApiKeyGuard)
 @Controller('events')
 export class EventController {
     constructor(private eventService: EventService) {}
