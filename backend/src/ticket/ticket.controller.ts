@@ -1,9 +1,11 @@
-import { Body, Controller, Get, Param, ParseIntPipe, Post, Res, StreamableFile } from '@nestjs/common';
+import { Body, Controller, Get, Param, ParseIntPipe, Post, Res, StreamableFile, UseGuards } from '@nestjs/common';
 import { TicketService } from './ticket.service';
 import { CreateTicketDto, ValidateTicketDto } from './dto';
 import { Response } from 'express';
 import { StorageService } from '../infra/storage/storage.interface';
+import { ApiKeyGuard } from 'src/auth/api-key.guard';
 
+@UseGuards(ApiKeyGuard)
 @Controller('tickets')
 export class TicketController {
     constructor(

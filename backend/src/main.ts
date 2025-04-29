@@ -1,6 +1,7 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { ValidationPipe } from '@nestjs/common';
+import { ApiKeyGuard } from './auth/api-key.guard';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -8,6 +9,16 @@ async function bootstrap() {
     whitelist: true,                   
     transform: true,
   }));
+
+  app.enableCors({
+    origin: [
+      'http://localhost:4200',       
+      'https://studivent-dhbw.de',  
+    ],
+    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
+    credentials: true        
+  });
+  app.useGlobalGuards(new ApiKeyGuard());
   await app.listen(process.env.PORT ?? 3000);
 }
 bootstrap();
