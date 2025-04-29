@@ -176,12 +176,13 @@ describe('App e2e', () => {
             quantity: mockTicket.quantity,
             tickets: [
               {
-                eventId: '$S{eventId}',    
+                eventId: '$S{eventId}',
                 ownerEmail: mockTicket.ownerEmail,
               },
             ],
           })
           .stores('ticketId', 'tickets[0].id') 
+          .stores('ticketCode', 'tickets[0].code');
       });
     });
 
@@ -206,6 +207,49 @@ describe('App e2e', () => {
           .expectStatus(404);
       });
     });
+
+    describe('Validate Ticket', () => {
+      it('should successfully validate the ticket', () => {
+        return pactum
+          .spec()
+          .post('/tickets/validate')
+          .withBody({ code: '$S{ticketCode}' })
+          .expectStatus(201)
+          .expectJsonLike({
+            ok: true,
+            ticketId: '$S{ticketId}',
+          });
+      });
+    
+      it('should not validate the ticket again', () => {
+        return pactum
+          .spec()
+          .post('/tickets/validate')
+          .withBody({ code: '$S{ticketCode}' })
+          .expectStatus(400) 
+          .expectBodyContains('Ticket already validated');
+      });
+    
+      it('should fail to validate a non-existing code', () => {
+        return pactum
+          .spec()
+          .post('/tickets/validate')
+          .withBody({ code: '00000000-0000-0000-0000-000000000000' }) 
+          .expectStatus(400)
+          .expectBodyContains('Ticket not found');
+      });
+    });
+    
+    describe('Get Ticket PDF', () => {
+      it('should return the ticket PDF file', () => {
+        return pactum
+          .spec()
+          .get('/tickets/{id}/pdf')
+          .withPathParams('id', '$S{ticketId}')
+          .expectStatus(200)
+          .expectHeader('content-type', 'application/pdf');
+      });
+    });    
 
   });
 

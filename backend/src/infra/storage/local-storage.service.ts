@@ -21,9 +21,11 @@ export class LocalStorageService implements StorageService {
   async get(path: string) {
     try {
       const bytes = await fs.readFile(join(this.base, path));
-      return new StreamableFile(bytes);
+      return bytes;
     } catch {
       throw new InternalServerErrorException('File not found on disk');
     }
   }
+  
+  
 }
