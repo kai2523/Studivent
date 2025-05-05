@@ -2,6 +2,7 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { ValidationPipe } from '@nestjs/common';
 import { ApiKeyGuard } from './auth/api-key.guard';
+import { ConfigService } from '@nestjs/config';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -19,7 +20,9 @@ async function bootstrap() {
     credentials: true,
     allowedHeaders: ['Origin', 'X-Requested-With', 'Content-Type', 'Accept', 'x-api-key'], 
   });
-  app.useGlobalGuards(new ApiKeyGuard());
+  const configService = app.get(ConfigService);
+  app.useGlobalGuards(new ApiKeyGuard(configService));
+
   await app.listen(process.env.PORT ?? 3000);
 }
 bootstrap();

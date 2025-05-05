@@ -1,8 +1,9 @@
 import { CanActivate, ExecutionContext, Injectable } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class ApiKeyGuard implements CanActivate {
-  private readonly expectedKey = process.env.API_KEY;
+  constructor(private readonly config: ConfigService) {}
 
   canActivate(ctx: ExecutionContext): boolean {
     const req = ctx.switchToHttp().getRequest<Request>();
@@ -10,12 +11,13 @@ export class ApiKeyGuard implements CanActivate {
     if (req.method === 'OPTIONS') {
       return true;
     }
+    const expected = this.config.get<string>('API_KEY');
 
     const key =
       req.headers['x-api-key'] ||
       req.headers['authorization']?.toString().replace('Api-Key ', '');
 
-    return key === this.expectedKey;
+    return key === expected;
   }
 }
 
