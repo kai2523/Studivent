@@ -1,34 +1,41 @@
 #!/bin/bash
+set -euo pipefail
 
 echo "🚀 Starte install_dependencies Skript..."
-
 echo "📂 Aktuelles Verzeichnis (vor mkdir): $(pwd)"
 
-mkdir -p /var/www/html
-echo "📁 Verzeichnis /var/www/html wurde erstellt (falls nicht vorhanden)."
+# 1) Erstelle /var/www/html mit root-Rechten und gib ubuntu den Besitz
+sudo mkdir -p /var/www/html
+sudo chown ubuntu:ubuntu /var/www/html
+echo "📁 Verzeichnis /var/www/html erstellt und Besitz auf ubuntu gesetzt."
 
+# 2) Wechsel in den Web-Root (dort wird später deployt)
 cd /var/www/html || {
   echo "❌ Fehler: /var/www/html existiert nicht oder konnte nicht betreten werden."
   exit 1
 }
 echo "📂 Neues Arbeitsverzeichnis: $(pwd)"
 
+# 3) Node.js (inkl. npm) installieren, falls noch nicht vorhanden
 if ! command -v npm &> /dev/null; then
   echo "📦 Node.js wird installiert..."
   curl -fsSL https://deb.nodesource.com/setup_18.x | sudo -E bash -
-  sudo apt install -y nodejs
+  sudo apt-get update -y
+  sudo apt-get install -y nodejs
 else
-  echo "✅ Node.js ist bereits installiert. Version: $(npm -v)"
+  echo "✅ Node.js ist bereits installiert. Version: $(node -v) / npm $(npm -v)"
 fi
 
+# 4) Abhängigkeiten installieren (falls package.json da ist)
 echo "📄 Dateien im aktuellen Verzeichnis:"
-ls
+ls -la
 
 if [ -f "package.json" ]; then
-  echo "📦 package.json gefunden – führe npm install aus..."
+  echo "📦 package.json gefunden – führe 'npm install' aus..."
   sudo npm install
+  echo "✅ npm install erfolgreich abgeschlossen."
 else
-  echo "⚠️  Keine package.json im aktuellen Verzeichnis gefunden – npm install wird übersprungen."
+  echo "⚠️ Keine package.json gefunden – npm install übersprungen."
 fi
 
-echo "✅ install_dependencies abgeschlossen."
+echo "✅ install_dependencies vollständig durchgelaufen."
