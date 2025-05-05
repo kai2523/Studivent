@@ -16,7 +16,8 @@ async function bootstrap() {
       'https://studivent-dhbw.de',  
     ],
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
-    credentials: true        
+    credentials: true,
+    allowedHeaders: ['Origin', 'X-Requested-With', 'Content-Type', 'Accept', 'x-api-key'], 
   });
   app.useGlobalGuards(new ApiKeyGuard());
   await app.listen(process.env.PORT ?? 3000);
