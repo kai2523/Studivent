@@ -1,13 +1,13 @@
 const express = require('express');
 const app = express();
-const port = process.env.PORT || 8080;
+const port = process.env.PORT || 3000;
 
 // Middleware zum Parsen von JSON-Daten
 app.use(express.json());
 
 // Beispielroute
 app.get('/', (req, res) => {
-  res.json({ staus: 200, message: 'Hello World!' });
+  res.send('Hello World!');
 });
 
 // Server starten
