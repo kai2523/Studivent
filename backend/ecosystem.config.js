@@ -1,7 +1,12 @@
 module.exports = {
-  apps : [{
+  apps : [ {
+    name: 'studivent-api',
     script: 'index.js',
-    watch: '.'
+    watch: '.',
+    env_file: '.env',
+      env_production: {
+        NODE_ENV: 'production'
+      }
   }, {
     script: './service-worker/',
     watch: ['./service-worker']
