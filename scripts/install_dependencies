@@ -18,7 +18,7 @@ echo "📂 Neues Arbeitsverzeichnis: $(pwd)"
 
 if ! command -v yarn &> /dev/null; then
   echo "📦 Yarn nicht gefunden. Installiere global..."
-  npm install -g yarn
+  sudo npm install -g yarn
 else
   echo "✅ Yarn ist bereits installiert: $(yarn -v)"
 fi
@@ -27,10 +27,10 @@ cd backend
 echo "📂 Wechsle in backend/: $(pwd)"
 
 echo "📦 Installiere Production-Dependencies via Yarn..."
-yarn install --production --silent
+sudo yarn install --production --silent
 
 echo "🔨 Führe Build aus..."
-yarn build
+sudo yarn build
 
 mkdir -p logs
 echo "📁 logs/-Ordner erstellt (für PM2)."
