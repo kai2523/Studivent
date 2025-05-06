@@ -1,0 +1,9 @@
+{
+    "/events": {
+      "target": "https://studivent-dhbw.de",
+      "secure": true,
+      "changeOrigin": true,
+      "logLevel": "debug"
+    }
+  }
+  

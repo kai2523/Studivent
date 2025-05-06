@@ -1,0 +1,30 @@
+<div class="container px-3 pt-4 pb-3">
+    <div class="row justify-content-between">
+      
+      <!-- Left side: image + "Events" -->
+      <div class="col-auto">
+        <div class="row align-items-center">
+          <div class="col-auto">
+            <img src="assets/img/50621467.png" alt="Icon" height="32">
+          </div>
+          <div class="col-auto">
+            <h1 class="mb-0 fw-semibold">Events</h1>
+          </div>
+        </div>
+      </div>
+      <div class="col-auto d-flex align-items-center">
+        <i class="fas fa-user mb-0 fs-3" (click)="goToProfile()"></i>
+      </div>
+  
+    </div>
+</div>
+<div class="container px-3">
+  <app-toggle-view (tabChanged)="onTabChanged($event)"></app-toggle-view>
+  <div class="container my-1">
+    <div class="row">
+      <div class="col-12 col-md-6 col-lg-4 p-0" *ngFor="let event of filteredEvents">
+        <app-event-card [event]="event"></app-event-card>
+      </div>
+    </div>
+  </div>
+</div>
