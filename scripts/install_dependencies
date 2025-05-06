@@ -2,46 +2,31 @@
 set -euo pipefail
 
 echo "🚀 Starte install_dependencies Skript..."
-echo "📂 Aktuelles Verzeichnis (vor mkdir): $(pwd)"
+echo "📂 Aktuelles Verzeichnis: $(pwd)"
 
-# 1) Erstelle /var/www/html mit root-Rechten und gib ubuntu den Besitz
+# 1) Web-Root anlegen
 sudo mkdir -p /var/www/html
 sudo chown ubuntu:ubuntu /var/www/html
-echo "📁 Verzeichnis /var/www/html erstellt und Besitz auf ubuntu gesetzt."
-
-# 2) Wechsel in den Web-Root
 cd /var/www/html
-echo "📂 Neues Arbeitsverzeichnis: $(pwd)"
 
-# 3) Stelle Node.js >=20 sicher
-NODE_MAJOR=$(node -v 2>/dev/null | cut -d. -f1 | tr -d 'v' || echo 0)
-if [ "$NODE_MAJOR" -lt 20 ]; then
-  echo "📦 Node.js-Version $NODE_MAJOR erkannt (<20). Installiere Node.js 20.x..."
-  curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
-  sudo apt-get install -y nodejs
-else
-  echo "✅ Node.js ist bereits >=20: $(node -v)"
-fi
+# 2) Node.js ≥20 installieren (non-interactive)
+export DEBIAN_FRONTEND=noninteractive
+curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
+sudo apt-get update
+sudo apt-get install -y nodejs
 
-# 4) Stelle Yarn sicher
+# 3) Yarn sicherstellen
 if ! command -v yarn &> /dev/null; then
-  echo "📦 Yarn nicht gefunden. Installiere global..."
   sudo npm install -g yarn
-else
-  echo "✅ Yarn ist bereits installiert: $(yarn -v)"
 fi
 
-# 5) In den Backend-Ordner wechseln und Dependencies installieren
+# 4) In Backend, alle Deps holen, bauen, dann nur Production-Deps beibehalten
 cd backend
-echo "📂 Arbeitsverzeichnis: $(pwd)"
-echo "📦 Installiere Production-Dependencies via Yarn..."
-sudo yarn install --production --silent
+yarn install --silent
+yarn build
+yarn install --production --silent
 
-echo "🔨 Führe Build aus..."
-sudo yarn build
-
-# 6) Logs-Verzeichnis für PM2 anlegen
+# 5) Logs-Ordner für PM2
 mkdir -p logs
-echo "📁 logs/-Ordner erstellt (für PM2)."
 
 echo "✅ install_dependencies abgeschlossen!"
