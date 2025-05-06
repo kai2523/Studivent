@@ -1,9 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -14,40 +8,36 @@ datasource db {
 }
 
 model Event {
-  id               Int       @id @default(autoincrement())
-  createdAt        DateTime  @default(now())
-  updatedAt        DateTime  @updatedAt
+  id           Int      @id @default(autoincrement())
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  title        String
+  description  String
+  date         DateTime
+  contact      String
+  imageUrl     String?
+  totalTickets Int
+  locationId   Int
+  location     Location @relation(fields: [locationId], references: [id])
+  tickets      Ticket[]
 
-  title            String
-  description      String
-  date             DateTime
-  contact          String
-  imageUrl         String?
-  totalTickets     Int
-  location         Location @relation(fields: [locationId], references: [id])
-  locationId       Int
-  tickets          Ticket[]
   @@map("events")
 }
 
 model Ticket {
-  id          Int      @id @default(autoincrement())
-  createdAt   DateTime @default(now())
+  id          Int       @id @default(autoincrement())
+  createdAt   DateTime  @default(now())
   ownerEmail  String
-  bookedAt    DateTime @default(now())
-
-  code          String   @unique @default(uuid()) 
-  validatedAt   DateTime?                                  
-
-  qrCodePath   String?  @map("qr_code_path")   
-  pdfPath      String?  @map("pdf_path")
-
-  event       Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  bookedAt    DateTime  @default(now())
+  qrCodePath  String?   @map("qr_code_path")
+  pdfPath     String?   @map("pdf_path")
   eventId     Int
+  code        String    @unique @default(uuid())
+  validatedAt DateTime?
+  event       Event     @relation(fields: [eventId], references: [id], onDelete: Cascade)
 
   @@index([eventId])
   @@map("tickets")
-
 }
 
 model Location {
@@ -58,5 +48,5 @@ model Location {
   country   String
   latitude  Float?
   longitude Float?
-  events  Event[]
+  events    Event[]
 }
