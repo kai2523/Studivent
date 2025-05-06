@@ -16,6 +16,13 @@ cd /var/www/html || {
 }
 echo "📂 Neues Arbeitsverzeichnis: $(pwd)"
 
+if ! command -v yarn &> /dev/null; then
+  echo "📦 Yarn nicht gefunden. Installiere global..."
+  npm install -g yarn
+else
+  echo "✅ Yarn ist bereits installiert: $(yarn -v)"
+fi
+
 cd backend
 echo "📂 Wechsle in backend/: $(pwd)"
 
