@@ -11,7 +11,7 @@ echo "📁 Verzeichnis /var/www/html erstellt und Besitz auf ubuntu gesetzt."
 
 # 2) Wechsel in den Web-Root (dort wird später deployt)
 cd /var/www/html || {
-  echo "❌ Fehler: /var/www/html existiert nicht oder konnte nicht betreten werden."
+  echo "Fehler: /var/www/html existiert nicht oder konnte nicht betreten werden."
   exit 1
 }
 echo "📂 Neues Arbeitsverzeichnis: $(pwd)"
