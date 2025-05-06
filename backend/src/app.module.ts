@@ -9,7 +9,7 @@ import { ApiKeyGuard } from './auth/api-key.guard';
 @Module({
   imports: [ConfigModule.forRoot({
     isGlobal: true,
-    envFilePath: [__dirname + '/../.env']
+    envFilePath: ['.env'],
   }),
   EventModule,
   PrismaModule,
