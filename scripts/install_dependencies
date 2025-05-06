@@ -16,26 +16,16 @@ cd /var/www/html || {
 }
 echo "📂 Neues Arbeitsverzeichnis: $(pwd)"
 
-# 3) Node.js (inkl. npm) installieren, falls noch nicht vorhanden
-if ! command -v npm &> /dev/null; then
-  echo "📦 Node.js wird installiert..."
-  curl -fsSL https://deb.nodesource.com/setup_18.x | sudo -E bash -
-  sudo apt-get update -y
-  sudo apt-get install -y nodejs
-else
-  echo "✅ Node.js ist bereits installiert. Version: $(node -v) / npm $(npm -v)"
-fi
+cd backend
+echo "📂 Wechsle in backend/: $(pwd)"
 
-# 4) Abhängigkeiten installieren (falls package.json da ist)
-echo "📄 Dateien im aktuellen Verzeichnis:"
-ls -la
+echo "📦 Installiere Production-Dependencies via Yarn..."
+yarn install --production --silent
 
-if [ -f "package.json" ]; then
-  echo "📦 package.json gefunden – führe 'npm install' aus..."
-  sudo npm install
-  echo "✅ npm install erfolgreich abgeschlossen."
-else
-  echo "⚠️ Keine package.json gefunden – npm install übersprungen."
-fi
+echo "🔨 Führe Build aus..."
+yarn build
 
-echo "✅ install_dependencies vollständig durchgelaufen."
+mkdir -p logs
+echo "📁 logs/-Ordner erstellt (für PM2)."
+
+echo "✅ install_dependencies abgeschlossen!"
