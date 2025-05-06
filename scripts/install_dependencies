@@ -24,9 +24,9 @@ else
 fi
 
 cd backend
-echo "📂 Wechsle in backend/: $(pwd)"
+echo " Wechsle in backend/: $(pwd)"
 
-echo "📦 Installiere Production-Dependencies via Yarn..."
+echo " Installiere Production-Dependencies via Yarn..."
 sudo yarn install --production --silent
 
 echo "🔨 Führe Build aus..."
