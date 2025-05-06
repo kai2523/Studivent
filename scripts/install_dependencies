@@ -9,13 +9,21 @@ sudo mkdir -p /var/www/html
 sudo chown ubuntu:ubuntu /var/www/html
 echo "📁 Verzeichnis /var/www/html erstellt und Besitz auf ubuntu gesetzt."
 
-# 2) Wechsel in den Web-Root (dort wird später deployt)
-cd /var/www/html || {
-  echo "Fehler: /var/www/html existiert nicht oder konnte nicht betreten werden."
-  exit 1
-}
+# 2) Wechsel in den Web-Root
+cd /var/www/html
 echo "📂 Neues Arbeitsverzeichnis: $(pwd)"
 
+# 3) Stelle Node.js >=20 sicher
+NODE_MAJOR=$(node -v 2>/dev/null | cut -d. -f1 | tr -d 'v' || echo 0)
+if [ "$NODE_MAJOR" -lt 20 ]; then
+  echo "📦 Node.js-Version $NODE_MAJOR erkannt (<20). Installiere Node.js 20.x..."
+  curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
+  sudo apt-get install -y nodejs
+else
+  echo "✅ Node.js ist bereits >=20: $(node -v)"
+fi
+
+# 4) Stelle Yarn sicher
 if ! command -v yarn &> /dev/null; then
   echo "📦 Yarn nicht gefunden. Installiere global..."
   sudo npm install -g yarn
@@ -23,15 +31,16 @@ else
   echo "✅ Yarn ist bereits installiert: $(yarn -v)"
 fi
 
+# 5) In den Backend-Ordner wechseln und Dependencies installieren
 cd backend
-echo " Wechsle in backend/: $(pwd)"
-
-echo " Installiere Production-Dependencies via Yarn..."
+echo "📂 Arbeitsverzeichnis: $(pwd)"
+echo "📦 Installiere Production-Dependencies via Yarn..."
 sudo yarn install --production --silent
 
 echo "🔨 Führe Build aus..."
 sudo yarn build
 
+# 6) Logs-Verzeichnis für PM2 anlegen
 mkdir -p logs
 echo "📁 logs/-Ordner erstellt (für PM2)."
 
