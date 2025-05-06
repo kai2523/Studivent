@@ -10,11 +10,18 @@ echo "📂 Aktuelles Verzeichnis: $(pwd)"
 echo "📄 Dateien:"
 ls -la
 
-if [ -f "package.json" ]; then
-  echo "📦 package.json gefunden – starte npm..."
-  sudo npm start
+APP_NAME="backend-api"
+
+# Check if app is already running in PM2
+if pm2 list | grep -q "$APP_NAME"; then
+  echo "🔁 Reload bestehender PM2-Prozess ($APP_NAME)..."
+  pm2 reload ecosystem.config.js --only "$APP_NAME"
 else
-  echo "⚠️  package.json nicht gefunden – npm start übersprungen"
+  echo "🚀 Starte neue PM2-App mit ecosystem.config.js..."
+  pm2 start ecosystem.config.js
 fi
 
-echo "✅ start_server abgeschlossen."
+# Ensure process is auto-started on server reboot
+pm2 save
+
+echo "✅ PM2-Prozess $APP_NAME läuft."
