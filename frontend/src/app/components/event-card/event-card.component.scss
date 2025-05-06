@@ -1,0 +1,6 @@
+.event-image {
+    width: 100%;         /* Always fill the width of its parent */
+    height: 200px;        /* Or whatever fixed height you prefer */
+    object-fit: cover;    /* MAGIC: Crop and center the image nicely */
+    object-position: center;
+  }
