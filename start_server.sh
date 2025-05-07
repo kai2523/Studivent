@@ -28,13 +28,13 @@ sudo chown -R ubuntu:ubuntu .
 
 # Dev+Build → Prod-only
 echo "Installing dev dependencies, building, then pruning to production…"
-yarn install
-yarn build
+sudo yarn install
+sudo yarn build
 
 # Logs-Ordner sicherstellen
 mkdir -p logs
 
-nest start
+sudo nest start
 
 # Zurück ins Root
 cd /var/www/Studivent
@@ -46,10 +46,10 @@ cd frontend
 
 # Dependencies installieren
 echo "Installing frontend dependencies…"
-npm install
+sudo npm install
 
 # Production-Build
 echo "Building Angular production bundle…"
-npm run build
+sudo npm run build
 
 echo "====== DONE: start_server.sh ======"
