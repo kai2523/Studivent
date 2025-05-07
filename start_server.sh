@@ -42,7 +42,7 @@ cd /var/www/Studivent/frontend
 
 # Dependencies installieren
 echo "Installing frontend dependencies…"
-npm install --no-optional
+npm install --no-optional --no-interactive
 
 # Production-Build
 echo "Building Angular production bundle…"
