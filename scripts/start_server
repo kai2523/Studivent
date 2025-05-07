@@ -1,13 +1,13 @@
 #!/bin/bash
 
-echo "🚀 Starte start_server Skript..."
+echo "Starte start_server Skript..."
 cd /var/www/html || {
-  echo "❌ /var/www/html nicht gefunden"
+  echo "/var/www/html nicht gefunden"
   exit 1
 }
 
-echo "📂 Aktuelles Verzeichnis: $(pwd)"
-echo "📄 Dateien:"
+echo "Aktuelles Verzeichnis: $(pwd)"
+echo "Dateien:"
 ls -la
 
 # ────────────── BACKEND mit PM2 ─────────────────
@@ -15,10 +15,10 @@ ls -la
 BACKEND_APP="backend-api"
 
 if pm2 list | grep -q "$BACKEND_APP"; then
-  echo "🔁 Reload bestehender PM2-Prozess ($BACKEND_APP)..."
+  echo "Reload bestehender PM2-Prozess ($BACKEND_APP)..."
   pm2 reload ecosystem.config.js --only "$BACKEND_APP"
 else
-  echo "🚀 Starte neue PM2-App ($BACKEND_APP) mit ecosystem.config.js..."
+  echo "Starte neue PM2-App ($BACKEND_APP) mit ecosystem.config.js..."
   pm2 start ecosystem.config.js
 fi
 
@@ -27,14 +27,14 @@ fi
 FRONTEND_APP="frontend-static"
 
 if pm2 list | grep -q "$FRONTEND_APP"; then
-  echo "🔁 Reload bestehender PM2-Static-Server ($FRONTEND_APP)..."
+  echo "Reload bestehender PM2-Static-Server ($FRONTEND_APP)..."
   pm2 reload "$FRONTEND_APP"
 else
-  echo "🚀 Starte neuen PM2-Static-Server für /var/www/html/dist..."
+  echo "Starte neuen PM2-Static-Server für /var/www/html/dist..."
   pm2 serve /var/www/html/dist 80 --name "$FRONTEND_APP" --spa
 fi
 
 # Prozesse nach Reboot wiederherstellen
 pm2 save
 
-echo "✅ PM2-Prozesse laufen (Backend: $BACKEND_APP, Frontend: $FRONTEND_APP)."
+echo "PM2-Prozesse laufen (Backend: $BACKEND_APP, Frontend: $FRONTEND_APP)."
