@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+\#!/usr/bin/env bash
 set -euo pipefail
 
 # ====================================================
@@ -30,8 +30,8 @@ sudo apt-get install -y nodejs
 # Corepack für Yarn aktivieren (ab Node.js 20 enthalten)
 
 echo "--- Activating Corepack / Yarn ---"
-corepack enable
-corepack prepare yarn\@stable --activate
+sudo corepack enable
+sudo corepack prepare yarn\@stable --activate
 
 echo "Node.js: \$(node --version)"
 echo "npm:       \$(npm --version)"
