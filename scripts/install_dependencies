@@ -1,8 +1,8 @@
 #!/bin/bash
 set -euo pipefail
 
-echo "🚀 Starte install_dependencies Skript..."
-echo "📂 Aktuelles Verzeichnis: $(pwd)"
+echo "Starte install_dependencies Skript..."
+echo "Aktuelles Verzeichnis: $(pwd)"
 
 # 1) Web-Root anlegen
 sudo mkdir -p /var/www/html
@@ -29,4 +29,4 @@ yarn install --production --silent
 # 5) Logs-Ordner für PM2
 mkdir -p logs
 
-echo "✅ install_dependencies abgeschlossen!"
+echo "install_dependencies abgeschlossen!"
