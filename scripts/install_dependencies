@@ -4,10 +4,13 @@ set -euo pipefail
 echo "Starte install_dependencies Skript..."
 echo "Aktuelles Verzeichnis: $(pwd)"
 
-# 1) Web-Root anlegen
+# 1) Web-Root anlegen und Besitzrechte setzen (rekursiv)
 sudo mkdir -p /var/www/html
-sudo chown ubuntu:ubuntu /var/www/html
+sudo chown -R ubuntu:ubuntu /var/www/html
 cd /var/www/html
+
+# Optional: Alte Dateien entfernen, falls noch Reste von vorherigen Deployments da sind
+# sudo rm -rf /var/www/html/*
 
 # 2) Node.js ≥20 installieren (non-interactive)
 export DEBIAN_FRONTEND=noninteractive
@@ -15,13 +18,25 @@ curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
 sudo apt-get update
 sudo apt-get install -y nodejs
 
-# 3) Yarn sicherstellen
+# 3) Yarn installieren (deb-basiert statt npm -g, vermeidet root-Cache-Probleme)
 if ! command -v yarn &> /dev/null; then
-  sudo npm install -g yarn
+  curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | sudo apt-key add -
+  echo "deb https://dl.yarnpkg.com/debian stable main" \
+    | sudo tee /etc/apt/sources.list.d/yarn.list
+  sudo apt-get update
+  sudo apt-get install -y yarn
 fi
 
-# 4) In Backend, alle Deps holen, bauen, dann nur Production-Deps beibehalten
+# 4) In Backend: Alten node_modules entfernen, Besitzrechte prüfen, Dependencies installieren
 cd backend
+
+# Reste vom letzten build wegräumen
+rm -rf node_modules
+
+# Sicherstellen, dass ubuntu alle Dateien schreiben darf
+sudo chown -R ubuntu:ubuntu .
+
+# Dev-Dependencies installieren, bauen und dann nur Production-Deps zurücklassen
 yarn install --silent
 yarn build
 yarn install --production --silent
