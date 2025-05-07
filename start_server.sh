@@ -11,17 +11,11 @@ sudo chown -R ubuntu:ubuntu /var/www/Studivent
 cd /var/www/Studivent
 
 # 2) Node.js ≥20 installieren
-if ! node -v; then
-  sudo apt-get update
-  sudo apt-get install -y nodejs
-fi
-
-# 3) Yarn installieren (falls nicht vorhanden)
-if ! command -v yarn &> /dev/null; then
-  echo "Installing Yarn..."
-  sudo apt-get update
-  sudo apt-get install -y yarn
-fi
+echo "Installing dependencies..."
+sudo apt-get update
+sudo apt-get install -y nodejs
+sudo apt-get install -y yarn
+sudo npm install -g @nestjs/cli
 
 # ────────────── BACKEND ──────────────
 
