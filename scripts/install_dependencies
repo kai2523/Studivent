@@ -27,21 +27,51 @@ if ! command -v yarn &> /dev/null; then
   sudo apt-get install -y yarn
 fi
 
-# 4) In Backend: Alten node_modules entfernen, Besitzrechte prüfen, Dependencies installieren
-cd backend
+# ────────────── BACKEND ─────────────────────────
 
-# Reste vom letzten build wegräumen
+cd /var/www/html/backend
+
+# Alte node_modules wegräumen
+rm -rf node_modules
+
+# Besitzrechte sicherstellen
+sudo chown -R ubuntu:ubuntu .
+
+# Dev-Dependencies installieren, bauen und Production-only installieren
+yarn install --silent
+yarn build
+yarn install --production --silent
+
+# Logs-Ordner für PM2
+mkdir -p logs
+
+echo "Backend-Abhängigkeiten installiert und gebaut."
+
+# ────────────── FRONTEND ────────────────────────
+
+cd /var/www/html/frontend
+
+# Alte node_modules wegräumen
 rm -rf node_modules
 
 # Sicherstellen, dass ubuntu alle Dateien schreiben darf
 sudo chown -R ubuntu:ubuntu .
 
-# Dev-Dependencies installieren, bauen und dann nur Production-Deps zurücklassen
-yarn install --silent
-yarn build
-yarn install --production --silent
+# 1) Dependencies installieren
+npm ci --silent
 
-# 5) Logs-Ordner für PM2
-mkdir -p logs
+# 2) Angular für Production bauen
+# Achtung: Ersetze `studivent` mit deinem tatsächlichen Projekt-Namen!
+ng build --configuration production
+
+# 3) Ausgabe in den Web-Root kopieren
+# Entferne ggf. altes Frontend
+rm -rf /var/www/html/dist
+cp -R dist/studivent /var/www/html/dist
+
+# Besitzrechte im Ziel korrigieren
+sudo chown -R ubuntu:ubuntu /var/www/html/dist
+
+echo "Frontend-Abhängigkeiten installiert, gebaut und ausgeliefert."
 
 echo "install_dependencies abgeschlossen!"
