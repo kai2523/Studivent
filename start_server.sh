@@ -1,63 +1,69 @@
-#!/bin/bash
+\#!/usr/bin/env bash
 set -euo pipefail
 
-echo "====== START: start_server.sh ======"
-echo "Working dir: $(pwd)"
+# ====================================================
 
-# 1) Web-Root anlegen und Rechte setzen
+# START: start\_server.sh (überarbeitet)
+
+# ====================================================
+
+echo "====== START: start\_server.sh ======"
+echo "Working dir: \$(pwd)"
+
+# 1) Setup Verzeichnis und Rechte
+
 echo "--- Setup /var/www/Studivent ---"
 sudo mkdir -p /var/www/Studivent
-sudo chown -R ubuntu:ubuntu /var/www/Studivent
+sudo chown -R ubuntu\:ubuntu /var/www/Studivent
 cd /var/www/Studivent
 
-# 2) Node.js ≥20 installieren
-echo "Installing dependencies..."
+# 2) Node.js ≥20 installieren (NodeSource) inkl. npm
+
+echo "--- Installing Node.js (NodeSource) ---"
 sudo apt-get update
+
+# Entferne ggf. altes Ubuntu-npm, um Konflikte zu vermeiden
+
+sudo apt-get purge -y npm || true
 sudo apt-get install -y nodejs
-sudo apt-get update
-sudo npm install -g @nestjs/cli
-nest --version
-sudo apt-get update
-sudo apt-get install -y nodejs npm
-# Corepack für Yarn
+
+# Corepack für Yarn aktivieren (ab Node.js 20 enthalten)
+
+echo "--- Activating Corepack / Yarn ---"
 corepack enable
-corepack prepare yarn@stable --activate
-echo "Yarn-Version: $(yarn --version)"
+corepack prepare yarn\@stable --activate
 
-# ────────────── BACKEND ──────────────
+echo "Node.js: \$(node --version)"
+echo "npm:       \$(npm --version)"
+echo "Yarn:      \$(yarn --version)"
 
-echo "--- Backend: /var/www/Studivent/backend ---"
-cd backend
+# ────────── BACKEND ──────────
 
-# Dev+Build → Prod-only
-echo "Installing dev dependencies and building…"
+echo "--- Backend: /var/www/html/backend ---"
+cd /var/www/html/backend
+
+echo "Installing dependencies and building…"
 yarn install --frozen-lockfile
 yarn build
 
-BACKEND_APP="backend-api"
+# PM2-Prozess verwalten
 
-if pm2 list | grep -q "$BACKEND_APP"; then
-  echo "Reload bestehender PM2-Prozess ($BACKEND_APP)..."
-  pm2 reload ecosystem.config.js --only "$BACKEND_APP"
+BACKEND\_APP="backend-api"
+if pm2 list | grep -q "\$BACKEND\_APP"; then
+echo "Reload existing PM2 process (\$BACKEND\_APP)..."
+pm2 reload ecosystem.config.js --only "\$BACKEND\_APP"
 else
-  echo "Starte neue PM2-App ($BACKEND_APP) mit ecosystem.config.js..."
-  pm2 start ecosystem.config.js
+echo "Start new PM2 app (\$BACKEND\_APP) with ecosystem.config.js..."
+pm2 start ecosystem.config.js
 fi
 
-# Zurück ins Root
-cd /var/www/Studivent
-
-# ────────────── FRONTEND ──────────────
+# ────────── FRONTEND ──────────
 
 echo "--- Frontend: /var/www/Studivent/frontend ---"
-cd frontend
+cd /var/www/Studivent/frontend
 
-# Dependencies installieren
-echo "Installing frontend dependencies…"
-sudo npm install
+echo "Installing frontend dependencies and building…"
+yarn install --frozen-lockfile
+yarn build
 
-# Production-Build
-echo "Building Angular production bundle…"
-sudo npm run build
-
-echo "====== DONE: start_server.sh ======"
+echo "====== DONE: start\_server.sh ======"
