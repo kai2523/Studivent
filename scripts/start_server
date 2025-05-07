@@ -37,4 +37,4 @@ fi
 # Prozesse nach Reboot wiederherstellen
 pm2 save
 
-echo "✅ PM2-Prozesse laufen (Backend: $BACKEND_APP, Frontend: $FRONTEND_APP)."
+echo "PM2-Prozesse laufen (Backend: $BACKEND_APP, Frontend: $FRONTEND_APP)."
