@@ -46,10 +46,10 @@ cd frontend
 
 # Dependencies installieren
 echo "Installing frontend dependencies…"
-npm install --silent
+npm install
 
 # Production-Build
 echo "Building Angular production bundle…"
-npm run build -- --configuration production
+npm run build
 
 echo "====== DONE: start_server.sh ======"
