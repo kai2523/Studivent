@@ -11,7 +11,7 @@ sudo chown -R ubuntu:ubuntu /var/www/Studivent
 cd /var/www/Studivent
 
 
-# Zurück ins Root
+# Zurück ins Root Verzeichnis
 cd /var/www/Studivent
 
 # ────────────── BACKEND ──────────────
