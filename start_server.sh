@@ -18,8 +18,8 @@ echo "Working dir: $(pwd)"
 
 # Dev+Build → Prod-only
 echo "Installing dev dependencies, building, then pruning to production…"
-yarn install
-yarn build
+/home/ubuntu/.nvm/versions/node/v22.15.0/bin/yarn install
+/home/ubuntu/.nvm/versions/node/v22.15.0/bin/yarn build
 
 BACKEND_APP="backend-api"
 
