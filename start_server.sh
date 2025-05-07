@@ -23,18 +23,20 @@ nest --version
 echo "--- Backend: /var/www/html/backend ---"
 cd backend
 
-# Besitzrechte setzen
-sudo chown -R ubuntu:ubuntu .
-
 # Dev+Build → Prod-only
 echo "Installing dev dependencies, building, then pruning to production…"
 sudo yarn install
 sudo yarn build
 
-# Logs-Ordner sicherstellen
-mkdir -p logs
+BACKEND_APP="backend-api"
 
-sudo nest start
+if pm2 list | grep -q "$BACKEND_APP"; then
+  echo "Reload bestehender PM2-Prozess ($BACKEND_APP)..."
+  pm2 reload ecosystem.config.js --only "$BACKEND_APP"
+else
+  echo "Starte neue PM2-App ($BACKEND_APP) mit ecosystem.config.js..."
+  pm2 start ecosystem.config.js
+fi
 
 # Zurück ins Root
 cd /var/www/Studivent
