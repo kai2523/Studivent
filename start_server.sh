@@ -28,10 +28,6 @@ fi
 echo "--- Backend: /var/www/html/backend ---"
 cd backend
 
-# Alte node_modules entfernen
-echo "Removing old node_modules…"
-rm -rf node_modules
-
 # Besitzrechte setzen
 sudo chown -R ubuntu:ubuntu .
 
