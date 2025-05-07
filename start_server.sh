@@ -18,8 +18,8 @@ echo "Working dir: $(pwd)"
 
 # Dev+Build → Prod-only
 echo "Installing dev dependencies, building, then pruning to production…"
-sudo yarn install --production --silent
-sudo yarn build
+yarn install --production --silent
+yarn build
 
 BACKEND_APP="backend-api"
 
@@ -41,10 +41,10 @@ cd frontend
 
 # Dependencies installieren
 echo "Installing frontend dependencies…"
-sudo npm install
+npm install
 
 # Production-Build
 echo "Building Angular production bundle…"
-sudo npm run build
+npm run build
 
 echo "====== DONE: start_server.sh ======"
