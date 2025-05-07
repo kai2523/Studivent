@@ -16,6 +16,7 @@ sudo apt-get update
 sudo apt-get install -y nodejs
 sudo apt-get install -y yarn
 sudo npm install -g @nestjs/cli
+nest --version
 
 # ────────────── BACKEND ──────────────
 
@@ -27,9 +28,8 @@ sudo chown -R ubuntu:ubuntu .
 
 # Dev+Build → Prod-only
 echo "Installing dev dependencies, building, then pruning to production…"
-yarn install --silent
+yarn install
 yarn build
-yarn install --production --silent
 
 # Logs-Ordner sicherstellen
 mkdir -p logs
