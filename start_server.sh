@@ -18,7 +18,7 @@ echo "Working dir: $(pwd)"
 
 # Dev+Build → Prod-only
 echo "Installing dev dependencies, building, then pruning to production…"
-yarn install --production --silent
+yarn install
 yarn build
 
 BACKEND_APP="backend-api"
