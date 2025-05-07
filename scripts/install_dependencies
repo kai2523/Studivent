@@ -59,7 +59,7 @@ else
 fi
 
 echo "→ Frontend: Production-Build"
-npx ng build --configuration production --silent
+npx ng build --configuration production
 
 echo "→ Frontend: Ausliefern"
 rm -rf /var/www/html/dist
