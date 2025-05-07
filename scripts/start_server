@@ -26,7 +26,6 @@ fi
 
 FRONTEND_APP="frontend-static"
 
-# pm2 serve liefert ein Verzeichnis über HTTP (Default Port 8080)
 if pm2 list | grep -q "$FRONTEND_APP"; then
   echo "🔁 Reload bestehender PM2-Static-Server ($FRONTEND_APP)..."
   pm2 reload "$FRONTEND_APP"

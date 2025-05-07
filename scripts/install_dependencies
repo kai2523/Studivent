@@ -9,7 +9,7 @@ sudo mkdir -p /var/www/html
 sudo chown -R ubuntu:ubuntu /var/www/html
 cd /var/www/html
 
-# Optional: Alte Dateien entfernen, falls noch Reste von vorherigen Deployments da sind
+# Optional: Alte Dateien entfernen
 # sudo rm -rf /var/www/html/*
 
 # 2) Node.js ≥20 installieren (non-interactive)
@@ -18,7 +18,7 @@ curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
 sudo apt-get update
 sudo apt-get install -y nodejs
 
-# 3) Yarn installieren (deb-basiert statt npm -g, vermeidet root-Cache-Probleme)
+# 3) Yarn installieren (deb-basierte Variante)
 if ! command -v yarn &> /dev/null; then
   curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | sudo apt-key add -
   echo "deb https://dl.yarnpkg.com/debian stable main" \
@@ -31,47 +31,40 @@ fi
 
 cd /var/www/html/backend
 
-# Alte node_modules wegräumen
+echo "→ Backend: Aufräumen"
 rm -rf node_modules
-
-# Besitzrechte sicherstellen
 sudo chown -R ubuntu:ubuntu .
 
-# Dev-Dependencies installieren, bauen und Production-only installieren
+echo "→ Backend: Dependencies installieren & bauen"
 yarn install --silent
 yarn build
 yarn install --production --silent
 
-# Logs-Ordner für PM2
 mkdir -p logs
-
-echo "Backend-Abhängigkeiten installiert und gebaut."
+echo "→ Backend fertig."
 
 # ────────────── FRONTEND ────────────────────────
 
 cd /var/www/html/frontend
 
-# Alte node_modules wegräumen
+echo "→ Frontend: Aufräumen"
 rm -rf node_modules
-
-# Sicherstellen, dass ubuntu alle Dateien schreiben darf
 sudo chown -R ubuntu:ubuntu .
 
-# 1) Dependencies installieren
-npm ci --silent
+echo "→ Frontend: Dependencies installieren"
+if [ -f package-lock.json ]; then
+  npm ci --silent
+else
+  npm install --silent
+fi
 
-# 2) Angular für Production bauen
-# Achtung: Ersetze `studivent` mit deinem tatsächlichen Projekt-Namen!
-ng build --configuration production
+echo "→ Frontend: Production-Build"
+npx ng build --configuration production --silent
 
-# 3) Ausgabe in den Web-Root kopieren
-# Entferne ggf. altes Frontend
+echo "→ Frontend: Ausliefern"
 rm -rf /var/www/html/dist
-cp -R dist/studivent /var/www/html/dist
-
-# Besitzrechte im Ziel korrigieren
+mkdir -p /var/www/html/dist
+cp -R dist/studivent/* /var/www/html/dist
 sudo chown -R ubuntu:ubuntu /var/www/html/dist
-
-echo "Frontend-Abhängigkeiten installiert, gebaut und ausgeliefert."
 
 echo "install_dependencies abgeschlossen!"
