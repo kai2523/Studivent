@@ -4,21 +4,18 @@ set -euo pipefail
 echo "Starte install_dependencies Skript..."
 echo "Aktuelles Verzeichnis: $(pwd)"
 
-# 1) Web-Root anlegen und Besitzrechte setzen (rekursiv)
+# 1) Web-Root anlegen & Rechte setzen
 sudo mkdir -p /var/www/html
 sudo chown -R ubuntu:ubuntu /var/www/html
 cd /var/www/html
 
-# Optional: Alte Dateien entfernen
-# sudo rm -rf /var/www/html/*
-
-# 2) Node.js ≥20 installieren (non-interactive)
+# 2) Node.js ≥20 installieren
 export DEBIAN_FRONTEND=noninteractive
 curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
 sudo apt-get update
 sudo apt-get install -y nodejs
 
-# 3) Yarn installieren (deb-basierte Variante)
+# 3) Yarn (wenn noch nicht da)
 if ! command -v yarn &> /dev/null; then
   curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | sudo apt-key add -
   echo "deb https://dl.yarnpkg.com/debian stable main" \
@@ -27,41 +24,47 @@ if ! command -v yarn &> /dev/null; then
   sudo apt-get install -y yarn
 fi
 
-# ────────────── BACKEND ─────────────────────────
-
+# ── BACKEND ──────────────────────────────────────
 cd /var/www/html/backend
-
-echo "→ Backend: Aufräumen"
+echo "→ Backend aufräumen"
 rm -rf node_modules
 sudo chown -R ubuntu:ubuntu .
 
-echo "→ Backend: Dependencies installieren & bauen"
+echo "→ Backend: Dependencies & Build"
 yarn install --silent
 yarn build
 yarn install --production --silent
 
 mkdir -p logs
-echo "→ Backend fertig."
+echo "Backend fertig."
 
-# ────────────── FRONTEND ────────────────────────
-
+# ── FRONTEND ─────────────────────────────────────
 cd /var/www/html/frontend
-
-echo "→ Frontend: Aufräumen"
+echo "→ Frontend aufräumen"
 rm -rf node_modules
 sudo chown -R ubuntu:ubuntu .
 
 echo "→ Frontend: Dependencies installieren"
 if [ -f package-lock.json ]; then
-  npm ci --silent
+  npm ci \
+    --silent \
+    --prefer-offline \
+    --no-audit \
+    --progress=false \
+    --jobs=4
 else
-  npm install --silent
+  npm install \
+    --silent \
+    --prefer-offline \
+    --no-audit \
+    --progress=false \
+    --jobs=4
 fi
 
 echo "→ Frontend: Production-Build"
 npx ng build --configuration production
 
-echo "→ Frontend: Ausliefern"
+echo "→ Frontend ausliefern"
 rm -rf /var/www/html/dist
 mkdir -p /var/www/html/dist
 cp -R dist/studivent/* /var/www/html/dist
