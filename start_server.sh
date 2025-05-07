@@ -14,19 +14,25 @@ cd /var/www/Studivent
 echo "Installing dependencies..."
 sudo apt-get update
 sudo apt-get install -y nodejs
-sudo apt-get install -y yarn
+sudo apt-get update
 sudo npm install -g @nestjs/cli
 nest --version
+sudo apt-get update
+sudo apt-get install -y nodejs npm
+# Corepack für Yarn
+corepack enable
+corepack prepare yarn@stable --activate
+echo "Yarn-Version: $(yarn --version)"
 
 # ────────────── BACKEND ──────────────
 
-echo "--- Backend: /var/www/html/backend ---"
+echo "--- Backend: /var/www/Studivent/backend ---"
 cd backend
 
 # Dev+Build → Prod-only
-echo "Installing dev dependencies, building, then pruning to production…"
-sudo yarn install
-sudo yarn build
+echo "Installing dev dependencies and building…"
+yarn install --frozen-lockfile
+yarn build
 
 BACKEND_APP="backend-api"
 
