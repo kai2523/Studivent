@@ -10,7 +10,7 @@ sudo mkdir -p /var/www/Studivent
 sudo chown -R ubuntu:ubuntu /var/www/Studivent
 cd /var/www/Studivent
 
-# 2) Node.js ≥20 installieren (non-interactive)
+# 2) Node.js ≥20 installieren
 if ! node -v; then
   sudo apt-get update
   sudo apt-get install -y nodejs
