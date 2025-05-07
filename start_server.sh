@@ -1,69 +1,50 @@
-#!/usr/bin/env bash
+#!/bin/bash
 set -euo pipefail
 
-# ====================================================
+echo "====== START: start_server.sh ======"
+echo "Working dir: $(pwd)"
 
-# START: start\_server.sh (überarbeitet)
-
-# ====================================================
-
-echo "====== START: start\_server.sh ======"
-echo "Working dir: \$(pwd)"
-
-# 1) Setup Verzeichnis und Rechte
-
+# 1) Web-Root anlegen und Rechte setzen
 echo "--- Setup /var/www/Studivent ---"
 sudo mkdir -p /var/www/Studivent
-sudo chown -R ubuntu\:ubuntu /var/www/Studivent
+sudo chown -R ubuntu:ubuntu /var/www/Studivent
 cd /var/www/Studivent
 
-# 2) Node.js ≥20 installieren (NodeSource) inkl. npm
+# ────────────── BACKEND ──────────────
 
-echo "--- Installing Node.js (NodeSource) ---"
-sudo apt-get update
+echo "--- Backend: /var/www/Studivent/backend ---"
+cd backend
+echo "Working dir: $(pwd)"
 
-# Entferne ggf. altes Ubuntu-npm, um Konflikte zu vermeiden
+# Dev+Build → Prod-only
+echo "Installing dev dependencies, building, then pruning to production…"
+sudo yarn install --production --silent
+sudo yarn build
 
-sudo apt-get purge -y npm || true
-sudo apt-get install -y nodejs
+BACKEND_APP="backend-api"
 
-# Corepack für Yarn aktivieren (ab Node.js 20 enthalten)
-
-echo "--- Activating Corepack / Yarn ---"
-sudo corepack enable
-sudo corepack prepare yarn\@stable --activate
-
-echo "Node.js: \$(node --version)"
-echo "npm:       \$(npm --version)"
-echo "Yarn:      \$(yarn --version)"
-
-# ────────── BACKEND ──────────
-
-echo "--- Backend: /var/www/html/backend ---"
-cd /var/www/html/backend
-
-echo "Installing dependencies and building…"
-yarn install --frozen-lockfile
-yarn build
-
-# PM2-Prozess verwalten
-
-BACKEND\_APP="backend-api"
-if pm2 list | grep -q "\$BACKEND\_APP"; then
-echo "Reload existing PM2 process (\$BACKEND\_APP)..."
-pm2 reload ecosystem.config.js --only "\$BACKEND\_APP"
+if pm2 list | grep -q "$BACKEND_APP"; then
+  echo "Reload bestehender PM2-Prozess ($BACKEND_APP)..."
+  pm2 reload ecosystem.config.js --only "$BACKEND_APP"
 else
-echo "Start new PM2 app (\$BACKEND\_APP) with ecosystem.config.js..."
-pm2 start ecosystem.config.js
+  echo "Starte neue PM2-App ($BACKEND_APP) mit ecosystem.config.js..."
+  pm2 start ecosystem.config.js
 fi
 
-# ────────── FRONTEND ──────────
+# Zurück ins Root
+cd /var/www/Studivent
+
+# ────────────── FRONTEND ──────────────
 
 echo "--- Frontend: /var/www/Studivent/frontend ---"
-cd /var/www/Studivent/frontend
+cd frontend
 
-echo "Installing frontend dependencies and building…"
-yarn install --frozen-lockfile
-yarn build
+# Dependencies installieren
+echo "Installing frontend dependencies…"
+sudo npm install
 
-echo "====== DONE: start\_server.sh ======"
+# Production-Build
+echo "Building Angular production bundle…"
+sudo npm run build
+
+echo "====== DONE: start_server.sh ======"
