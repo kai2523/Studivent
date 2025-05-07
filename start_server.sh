@@ -10,6 +10,22 @@ sudo mkdir -p /var/www/Studivent
 sudo chown -R ubuntu:ubuntu /var/www/Studivent
 cd /var/www/Studivent
 
+# ────────────── FRONTEND ──────────────
+
+echo "--- Frontend: /var/www/Studivent/frontend ---"
+cd frontend
+
+# Dependencies installieren
+echo "Installing frontend dependencies…"
+npm install
+
+# Production-Build
+echo "Building Angular production bundle…"
+npm run build
+
+# Zurück ins Root
+cd /var/www/Studivent
+
 # ────────────── BACKEND ──────────────
 
 echo "--- Backend: /var/www/Studivent/backend ---"
@@ -31,20 +47,5 @@ else
   pm2 start ecosystem.config.js
 fi
 
-# Zurück ins Root
-cd /var/www/Studivent
-
-# ────────────── FRONTEND ──────────────
-
-echo "--- Frontend: /var/www/Studivent/frontend ---"
-cd frontend
-
-# Dependencies installieren
-echo "Installing frontend dependencies…"
-npm install
-
-# Production-Build
-echo "Building Angular production bundle…"
-npm run build
 
 echo "====== DONE: start_server.sh ======"
