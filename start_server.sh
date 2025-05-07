@@ -44,14 +44,7 @@ yarn install --production --silent
 # Logs-Ordner sicherstellen
 mkdir -p logs
 
-# 4) Backend per PM2 starten oder reloaden
-BACKEND_APP="backend-api"
-echo "--- PM2: Backend ($BACKEND_APP) ---"
-if pm2 list | grep -q "$BACKEND_APP"; then
-  pm2 reload ecosystem.config.js --only "$BACKEND_APP"
-else
-  pm2 start ecosystem.config.js --only "$BACKEND_APP"
-fi
+nest start
 
 # Zurück ins Root
 cd /var/www/Studivent
@@ -68,19 +61,5 @@ npm install --silent
 # Production-Build
 echo "Building Angular production bundle…"
 npm run build -- --configuration production
-
-# 5) Frontend per PM2 serve starten/reload
-FRONTEND_APP="frontend-static"
-DIST_DIR="../frontend/dist"
-echo "--- PM2: Frontend ($FRONTEND_APP) ---"
-if pm2 list | grep -q "$FRONTEND_APP"; then
-  pm2 reload "$FRONTEND_APP"
-else
-  pm2 serve $DIST_DIR 80 --name "$FRONTEND_APP" --spa
-fi
-
-# 6) PM2-Prozesse persistieren
-echo "Saving PM2 process list…"
-pm2 save
 
 echo "====== DONE: start_server.sh ======"
