@@ -1,30 +1,66 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateEventDto, EditEventDto } from './dto';
+import { StorageService } from '../infra/storage/storage.interface';
+
+import axios from 'axios';
+import { fileTypeFromBuffer } from 'file-type';
 
 @Injectable()
 export class EventService {
-    constructor(private readonly prisma: PrismaService) {}
+    constructor(
+      private readonly prisma: PrismaService,
+      private readonly storage: StorageService,
+    ) {}
 
     async create(dto: CreateEventDto) {
-        return this.prisma.event.create({
-          data: {
-            title: dto.title,
-            description: dto.description,
-            date: dto.date,
-            contact: dto.contact,
-            imageUrl: dto.imageUrl,
-            totalTickets: dto.totalTickets,
-            location: {
-              create: dto.location,
-            },
-          },
-          include: {
-            location: true,
-          },
-        });
+      if (!dto.imageUrl) {
+        throw new BadRequestException('imageUrl must be provided');
       }
+  
+      const event = await this.prisma.event.create({
+        data: {
+          title       : dto.title,
+          description : dto.description,
+          date        : dto.date,
+          contact     : dto.contact,
+          totalTickets: dto.totalTickets,
+          location    : { create: dto.location },
+        },
+        include: { location: true },
+      });
+  
+      let arrayBuffer: ArrayBuffer;
+      try {
+        const { data } = await axios.get<ArrayBuffer>(dto.imageUrl, {
+          responseType  : 'arraybuffer',
+          timeout       : 20_000,
+          validateStatus: (s) => s < 400,
+        });
+        arrayBuffer = data;
+      } catch {
+        throw new BadRequestException('Unable to download the banner image');
+      }
+  
+      const buffer = Buffer.from(new Uint8Array(arrayBuffer));
 
+      const ft = await fileTypeFromBuffer(buffer);
+      if (!ft || !ft.mime.startsWith('image/')) {
+        throw new BadRequestException('imageUrl must point to a valid image');
+      }
+  
+      const key = `events/${event.id}/banner.${ft.ext}`;
+      await this.storage.put(key, buffer, ft.mime);
+  
+      const updated = await this.prisma.event.update({
+        where  : { id: event.id },
+        data   : { imageUrl: key },
+        include: { location: true },
+      });
+  
+      return updated;
+    }
+  
     findAll() {
         return this.prisma.event.findMany({
             include: {
