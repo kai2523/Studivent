@@ -49,4 +49,6 @@ model Location {
   latitude  Float?
   longitude Float?
   events    Event[]
+  
+  @@map("locations")
 }
