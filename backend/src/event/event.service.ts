@@ -5,6 +5,7 @@ import { StorageService } from '../infra/storage/storage.interface';
 
 import axios from 'axios';
 import { fileTypeFromBuffer } from 'file-type';
+import { Prisma } from '@prisma/client';
 
 @Injectable()
 export class EventService {
@@ -13,11 +14,33 @@ export class EventService {
       private readonly storage: StorageService,
     ) {}
 
+    private async uploadBanner(eventId: number, externalUrl: string): Promise<string> {
+      // Download image
+      const { data } = await axios.get<ArrayBuffer>(externalUrl, {
+        responseType  : 'arraybuffer',
+        timeout       : 20_000,
+        validateStatus: s => s < 400,
+      });
+      const buffer = Buffer.from(new Uint8Array(data));
+    
+      // Sniff mime/ext
+      const ft = await fileTypeFromBuffer(buffer);
+      if (!ft || !ft.mime.startsWith('image/')) {
+        throw new BadRequestException('imageUrl must point to a valid image');
+      }
+    
+      // Upload to S3
+      const key = `events/${eventId}/banner.${ft.ext}`;
+      await this.storage.put(key, buffer, ft.mime);
+    
+      return key;
+    }
+    
     async create(dto: CreateEventDto) {
       if (!dto.imageUrl) {
         throw new BadRequestException('imageUrl must be provided');
       }
-  
+    
       const event = await this.prisma.event.create({
         data: {
           title       : dto.title,
@@ -29,45 +52,30 @@ export class EventService {
         },
         include: { location: true },
       });
-  
-      let arrayBuffer: ArrayBuffer;
-      try {
-        const { data } = await axios.get<ArrayBuffer>(dto.imageUrl, {
-          responseType  : 'arraybuffer',
-          timeout       : 20_000,
-          validateStatus: (s) => s < 400,
-        });
-        arrayBuffer = data;
-      } catch {
-        throw new BadRequestException('Unable to download the banner image');
-      }
-  
-      const buffer = Buffer.from(new Uint8Array(arrayBuffer));
-
-      const ft = await fileTypeFromBuffer(buffer);
-      if (!ft || !ft.mime.startsWith('image/')) {
-        throw new BadRequestException('imageUrl must point to a valid image');
-      }
-  
-      const key = `events/${event.id}/banner.${ft.ext}`;
-      await this.storage.put(key, buffer, ft.mime);
-  
-      const updated = await this.prisma.event.update({
+    
+      const key = await this.uploadBanner(event.id, dto.imageUrl);
+    
+      return this.prisma.event.update({
         where  : { id: event.id },
         data   : { imageUrl: key },
         include: { location: true },
       });
-  
-      return updated;
     }
-  
-    findAll() {
-        return this.prisma.event.findMany({
-            include: {
-            location: true,
-            tickets: true,
-            },
-        });
+    
+    async findAll() {
+      const events = await this.prisma.event.findMany({
+        include: { location: true, tickets: true },
+      });
+
+      await Promise.all(
+        events.map(async (e) => {
+          if (e.imageUrl) {
+            e.imageUrl = await this.storage.getSignedUrl(e.imageUrl, 60 * 15);
+          }
+        }),
+      );
+    
+      return events;
     }
     
     findOne(id: number) {
@@ -81,45 +89,44 @@ export class EventService {
     }
 
     async update(id: number, dto: EditEventDto) {
-        try {
-          return await this.prisma.event.update({
-            where: { id },
-            data: {
-              title: dto.title,
-              description: dto.description,
-              date: dto.date,
-              contact: dto.contact,
-              imageUrl: dto.imageUrl,
-              totalTickets: dto.totalTickets,
-              ...(dto.location && {
-                location: {
-                  update: dto.location, // 👈 Apply only if `location` is provided
-                },
-              }),
-            },
-            include: {
-              location: true,
-            },
-          });
-        } catch (err) {
-          console.error(err);
-          return null;
-        }
-    } 
+      const exists = await this.prisma.event.findUnique({ where: { id } });
+      if (!exists) throw new NotFoundException(`Event #${id} not found`);
+    
+      // Upload a new banner only if caller sent imageUrl
+      let bannerKey: string | undefined;
+      if (dto.imageUrl) {
+        bannerKey = await this.uploadBanner(id, dto.imageUrl);
+      }
+    
+      const data: Prisma.EventUpdateInput = {
+        title       : dto.title,
+        description : dto.description,
+        date        : dto.date,
+        contact     : dto.contact,
+        totalTickets: dto.totalTickets,
+        ...(bannerKey && { imageUrl: bannerKey }),
+        ...(dto.location && { location: { update: dto.location } }),
+      };
+    
+      return this.prisma.event.update({
+        where  : { id },
+        data,
+        include: { location: true },
+      });
+    }
 
     async remove(id: number) {
-        try {
-            await this.prisma.event.delete({
-            where: { id },
-            });
-            return true;
-        } catch {
-            return false;
-        }
+      try {
+          await this.prisma.event.delete({
+          where: { id },
+          });
+          return true;
+      } catch {
+          return false;
+      }
     }
 
     async findTicketsForEvent(eventId: number, { page, size }: { page: number; size: number }) {
-
       const eventExists = await this.prisma.event.findUnique({
         where: { id: eventId },
         select: { id: true },

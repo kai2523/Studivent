@@ -18,7 +18,10 @@
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:e2e": "jest --watch --no-cache --config ./test/jest-e2e.json",
-    "studio": "dotenv -e ../.env -- prisma studio --schema prisma/schema.prisma"
+    "studio": "dotenv -e ../.env -- prisma studio --schema prisma/schema.prisma",
+    "migrate:dev"   : "dotenv -e ../.env -- prisma migrate dev    --schema prisma/schema.prisma",
+    "migrate:deploy": "dotenv -e ./.env -- prisma migrate deploy --schema prisma/schema.prisma",
+    "generate"      : "dotenv -e ./.env -- prisma generate       --schema prisma/schema.prisma"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.804.0",
