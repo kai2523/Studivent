@@ -9,15 +9,15 @@ datasource db {
 
 model Event {
   id           Int      @id @default(autoincrement())
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt      @map("updated_at")
   title        String
   description  String
   date         DateTime
   contact      String
-  imageUrl     String?
-  totalTickets Int
-  locationId   Int
+  imageUrl     String?  @map("image_url")
+  totalTickets Int      @map("total_tickets")
+  locationId   Int      @map("location_id")
   location     Location @relation(fields: [locationId], references: [id])
   tickets      Ticket[]
 
@@ -26,14 +26,14 @@ model Event {
 
 model Ticket {
   id          Int       @id @default(autoincrement())
-  createdAt   DateTime  @default(now())
-  ownerEmail  String
-  bookedAt    DateTime  @default(now())
+  createdAt   DateTime  @default(now()) @map("created_at")
+  ownerEmail  String    @map("owner_email")
+  bookedAt    DateTime  @default(now()) @map("booked_at")
   qrCodePath  String?   @map("qr_code_path")
   pdfPath     String?   @map("pdf_path")
-  eventId     Int
+  eventId     Int       @map("event_id")
   code        String    @unique @default(uuid())
-  validatedAt DateTime?
+  validatedAt DateTime? @map("validated_at")
   event       Event     @relation(fields: [eventId], references: [id], onDelete: Cascade)
 
   @@index([eventId])
