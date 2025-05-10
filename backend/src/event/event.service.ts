@@ -133,9 +133,20 @@ export class EventService {
 
     // Upload a new banner only if caller sent imageUrl
     if (dto.imageUrl) {
+      const oldPath = exists.imageUrl;
+
       const result = await this.uploadBanner(id, dto.imageUrl);
       bannerUuid = result.uuid;
       imagePath = result.key;
+
+      if (oldPath) {
+        try {
+          await this.storage.delete(oldPath);
+        } catch (err) {
+          // log or ignore—the old file might already be gone
+          console.warn(`Failed to delete old banner at ${oldPath}`, err);
+        }
+      }
     }
 
     const data: Prisma.EventUpdateInput = {
