@@ -16,6 +16,7 @@ model Event {
   date         DateTime
   contact      String
   imageUrl     String?  @map("image_url")
+  banner       String?  @db.Uuid
   totalTickets Int      @map("total_tickets")
   locationId   Int      @map("location_id")
   location     Location @relation(fields: [locationId], references: [id])
