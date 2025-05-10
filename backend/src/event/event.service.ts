@@ -1,4 +1,8 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateEventDto, EditEventDto } from './dto';
 import { StorageService } from '../infra/storage/storage.interface';
@@ -15,15 +19,18 @@ export class EventService {
     private readonly storage: StorageService,
   ) {}
 
-  private async uploadBanner(eventId: number, externalUrl: string): Promise<{ uuid: string; key: string }>  {
+  private async uploadBanner(
+    eventId: number,
+    externalUrl: string,
+  ): Promise<{ uuid: string; key: string }> {
     // Download image
     const { data } = await axios.get<ArrayBuffer>(externalUrl, {
-      responseType  : 'arraybuffer',
-      timeout       : 20_000,
-      validateStatus: s => s < 400,
+      responseType: 'arraybuffer',
+      timeout: 20_000,
+      validateStatus: (s) => s < 400,
     });
     const buffer = Buffer.from(new Uint8Array(data));
-  
+
     // Sniff mime/ext
     const ft = await fileTypeFromBuffer(buffer);
     if (!ft || !ft.mime.startsWith('image/')) {
@@ -31,55 +38,66 @@ export class EventService {
     }
 
     // Generate a UUID for the filename
-    const fileId = uuidv4();                     
-    const filename = `${fileId}.${ft.ext}`; 
-  
+    const fileId = uuidv4();
+    const filename = `${fileId}.${ft.ext}`;
+
     // Upload to S3
     const key = `events/banner/${filename}`;
     await this.storage.put(key, buffer, ft.mime);
-  
+
     return { uuid: fileId, key };
   }
-    
+
   async create(dto: CreateEventDto) {
     if (!dto.imageUrl) {
       throw new BadRequestException('imageUrl must be provided');
     }
-  
+
     const event = await this.prisma.event.create({
       data: {
-        title       : dto.title,
-        description : dto.description,
-        date        : dto.date,
-        contact     : dto.contact,
+        title: dto.title,
+        description: dto.description,
+        date: dto.date,
+        contact: dto.contact,
         totalTickets: dto.totalTickets,
-        location    : { create: dto.location },
+
+        location: {
+          connectOrCreate: {
+            where: {
+              name_address_city_country: {
+                name: dto.location.name,
+                address: dto.location.address,
+                city: dto.location.city,
+                country: dto.location.country,
+              },
+            },
+            create: dto.location,
+          },
+        },
       },
       include: { location: true },
     });
-  
-    const { uuid: bannerUuid, key: imagePath } =
-      await this.uploadBanner(event.id, dto.imageUrl);
-  
+
+    const { uuid: bannerUuid, key: imagePath } = await this.uploadBanner(
+      event.id,
+      dto.imageUrl,
+    );
+
     return this.prisma.event.update({
-      where  : { id: event.id },
-      data   : { 
-        imageUrl: imagePath,
-        banner: bannerUuid
-      },
+      where: { id: event.id },
+      data: { imageUrl: imagePath, banner: bannerUuid },
       select: {
-      id           : true,
-      title        : true,
-      description  : true,
-      date         : true,
-      contact      : true,
-      totalTickets : true,
-      imageUrl     : true,
-      location     : true
-      }  
+        id: true,
+        title: true,
+        description: true,
+        date: true,
+        contact: true,
+        totalTickets: true,
+        location: true,
+      },
     });
   }
-    
+
   async findAll() {
     const events = await this.prisma.event.findMany({
       include: { location: true, tickets: true },
@@ -92,18 +110,18 @@ export class EventService {
         }
       }),
     );
-  
+
     return events;
   }
-    
+
   findOne(id: number) {
-      return this.prisma.event.findUnique({
-          where: { id },
-          include: {
-          location: true,
-          tickets: true,
-          },
-      });
+    return this.prisma.event.findUnique({
+      where: { id },
+      include: {
+        location: true,
+        tickets: true,
+      },
+    });
   }
 
   async update(id: number, dto: EditEventDto) {
@@ -115,55 +133,80 @@ export class EventService {
 
     // Upload a new banner only if caller sent imageUrl
     if (dto.imageUrl) {
-    const result = await this.uploadBanner(id, dto.imageUrl);
-    bannerUuid = result.uuid;
-    imagePath  = result.key;
+      const result = await this.uploadBanner(id, dto.imageUrl);
+      bannerUuid = result.uuid;
+      imagePath = result.key;
     }
 
     const data: Prisma.EventUpdateInput = {
-      title        : dto.title,
-      description  : dto.description,
-      date         : dto.date,
-      contact      : dto.contact,
-      totalTickets : dto.totalTickets,
-      ...(bannerUuid && { banner: bannerUuid }),
-      ...(imagePath  && { imageUrl: imagePath  }),
-      ...(dto.location && { location: { update: dto.location } }),
+      title: dto.title,
+      description: dto.description,
+      date: dto.date,
+      contact: dto.contact,
+      totalTickets: dto.totalTickets,
     };
-  
+
+    if (bannerUuid) data.banner = bannerUuid;
+    if (imagePath) data.imageUrl = imagePath;
+
+    if (
+      dto.location?.name &&
+      dto.location.address &&
+      dto.location.city &&
+      dto.location.country
+    ) {
+      const { name, address, city, country, latitude, longitude } =
+        dto.location;
+
+      Object.assign(data, {
+        location: {
+          connectOrCreate: {
+            where: {
+              name_address_city_country: { name, address, city, country },
+            },
+            create: { name, address, city, country, latitude, longitude },
+          },
+        },
+      });
+    }
+
     return this.prisma.event.update({
-      where  : { id },
+      where: { id },
       data,
       select: {
-      id           : true,
-      title        : true,
-      description  : true,
-      date         : true,
-      contact      : true,
-      totalTickets : true,
-      imageUrl     : true,
-      location     : true
-      }  
+        id: true,
+        title: true,
+        description: true,
+        date: true,
+        contact: true,
+        totalTickets: true,
+        imageUrl: true,
+        location: true,
+      },
     });
   }
 
   async remove(id: number) {
     try {
-        await this.prisma.event.delete({
+      await this.prisma.event.delete({
         where: { id },
-        });
-        return true;
+      });
+      return true;
     } catch {
-        return false;
+      return false;
     }
   }
 
-  async findTicketsForEvent(eventId: number, { page, size }: { page: number; size: number }) {
+  async findTicketsForEvent(
+    eventId: number,
+    { page, size }: { page: number; size: number },
+  ) {
     const eventExists = await this.prisma.event.findUnique({
       where: { id: eventId },
       select: { id: true },
     });
-    if (!eventExists) throw new NotFoundException(`Event #${eventId} not found`);
+    if (!eventExists)
+      throw new NotFoundException(`Event #${eventId} not found`);
 
     return this.prisma.ticket.findMany({
       where: { eventId },

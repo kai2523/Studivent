@@ -51,5 +51,6 @@ model Location {
   longitude Float?
   events    Event[]
   
+  @@unique([name, address, city, country])
   @@map("locations")
 }

@@ -20,4 +20,3 @@ export class ApiKeyGuard implements CanActivate {
     return key === expected;
   }
 }
-
