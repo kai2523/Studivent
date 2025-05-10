@@ -206,7 +206,6 @@ export class EventService {
     }
   }
 
-
   async findTicketsForEvent(
     eventId: number,
     { page, size }: { page: number; size: number },

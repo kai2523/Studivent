@@ -10,5 +10,4 @@ export abstract class StorageService {
   abstract get(path: string): Promise<Buffer>;
 
   abstract delete(path: string): Promise<void>;
-
 }

@@ -68,9 +68,9 @@ export class S3StorageService implements StorageService {
         }),
       );
     } catch (err) {
-        throw new InternalServerErrorException(
-          `Failed to delete S3 object ${path}: ${err}`,
-        );
+      throw new InternalServerErrorException(
+        `Failed to delete S3 object ${path}: ${err}`,
+      );
     }
   }
 }
