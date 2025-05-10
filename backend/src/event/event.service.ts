@@ -186,16 +186,26 @@ export class EventService {
     });
   }
 
-  async remove(id: number) {
+  async remove(id: number): Promise<boolean> {
+    const event = await this.prisma.event.findUnique({
+      where: { id },
+      select: { imageUrl: true },
+    });
+    if (!event) return false;
+
     try {
-      await this.prisma.event.delete({
-        where: { id },
-      });
+      // delete the banner from S3
+      if (event.imageUrl) {
+        await this.storage.delete(event.imageUrl);
+      }
+      // then delete the DB record
+      await this.prisma.event.delete({ where: { id } });
       return true;
     } catch {
       return false;
     }
   }
+
 
   async findTicketsForEvent(
     eventId: number,

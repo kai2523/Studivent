@@ -2,6 +2,7 @@ import {
   S3Client,
   PutObjectCommand,
   GetObjectCommand,
+  DeleteObjectCommand,
 } from '@aws-sdk/client-s3';
 import { getSignedUrl as presign } from '@aws-sdk/s3-request-presigner';
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
@@ -55,6 +56,21 @@ export class S3StorageService implements StorageService {
       return Buffer.concat(chunks);
     } catch {
       throw new InternalServerErrorException('File not found in S3');
+    }
+  }
+
+  async delete(path: string) {
+    try {
+      await this.client.send(
+        new DeleteObjectCommand({
+          Bucket: this.bucket,
+          Key: path,
+        }),
+      );
+    } catch (err) {
+        throw new InternalServerErrorException(
+          `Failed to delete S3 object ${path}: ${err}`,
+        );
     }
   }
 }
