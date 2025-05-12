@@ -54,3 +54,10 @@ model Location {
   @@unique([name, address, city, country])
   @@map("locations")
 }
+
+generator erd {
+  provider = "prisma-erd-generator"
+  output = "../ERD.svg"
+  //disabled = true
+  theme = "neutral"
+}
