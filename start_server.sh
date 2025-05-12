@@ -35,6 +35,42 @@ else
   pm2 start ecosystem.config.js
 fi
 
+# ────────────── CMS ──────────────
+
+cd /var/www/Studivent/cms
+echo "Working directory: $(pwd)"
+
+CMS_APP="cms-directus"
+
+echo "🔧 Installing CMS dependencies…"
+npm install
+
+echo "🔧 Installing extension dependencies…"
+EXTENSIONS_PATH="./extensions"
+if [ -d "$EXTENSIONS_PATH" ]; then
+  for EXT in "$EXTENSIONS_PATH"/*; do
+    if [ -f "$EXT/package.json" ]; then
+      echo "📦 Installing in: $EXT"
+      cd "$EXT"
+      npm install
+      npm run build
+      cd - > /dev/null
+    fi
+  done
+else
+  echo "⚠️ No extensions directory found"
+fi
+
+npx directus bootstrap
+
+if pm2 list | grep -q "$CMS_APP"; then
+  echo "Reloading existing PM2 app ($CMS_APP)…"
+  pm2 reload ecosystem.config.js --only "$CMS_APP"
+else
+  echo "Starting PM2 app ($CMS_APP)…"
+  pm2 start ecosystem.config.js --only "$CMS_APP"
+fi
+
 # ────────────── FRONTEND ──────────────
 
 echo "--- Frontend: /var/www/Studivent/frontend ---"
