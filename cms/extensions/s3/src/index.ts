@@ -55,7 +55,6 @@ export default defineHook(({ filter }) => {
       if (event?.banner) {
         const bannerId = event.banner;
 
-        // Delete all S3 files starting with banner ID
         const listed = await s3.send(
           new ListObjectsV2Command({
             Bucket: bucketName,
@@ -75,12 +74,29 @@ export default defineHook(({ filter }) => {
               Key: file.Key,
             })
           );
-          console.log(`🗑️ Deleted from S3: ${file.Key}`);
+          console.log(`Deleted from S3: ${file.Key}`);
         }
 
-        // Delete from Directus file library
         await database('directus_files').where({ id: bannerId }).del();
         console.log(`🗑️ Deleted directus_files row: ${bannerId}`);
+      }
+
+      const tickets = await database('tickets')
+        .select('qr_code_path', 'pdf_path')
+        .where({ event_id: id });
+
+      for (const ticket of tickets) {
+        const paths = [ticket.qr_code_path, ticket.pdf_path].filter((p): p is string => !!p);
+
+        for (const path of paths) {
+          await s3.send(
+            new DeleteObjectCommand({
+              Bucket: bucketName,
+              Key: path,
+            })
+          );
+          console.log(`Deleted ticket file from S3: ${path}`);
+        }
       }
     }
 
