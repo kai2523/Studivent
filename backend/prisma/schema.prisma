@@ -58,6 +58,6 @@ model Location {
 generator erd {
   provider = "prisma-erd-generator"
   output = "../ERD.svg"
-  //disabled = true
+  disabled = true
   theme = "neutral"
 }
