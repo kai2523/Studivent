@@ -34,6 +34,10 @@ const s3 = new S3Client({
 
 export default defineHook(({ filter }, { services: ServiceClasses, database, getSchema }) => {
   filter('events.items.read', async (itemsPayload: any[], _meta: any, contextApi: any) => {
+    if (!itemsPayload?.[0]) {
+      return itemsPayload;
+    }
+
     const currentItem = itemsPayload[0];
     const fileId = currentItem.banner;
 
