@@ -200,19 +200,42 @@ export class EventService {
   async remove(id: number): Promise<boolean> {
     const event = await this.prisma.event.findUnique({
       where: { id },
-      select: { imageUrl: true },
+      select: {
+        imageUrl: true,
+        tickets: {
+          select: {
+            id: true,
+            qrCodePath: true,
+            pdfPath: true,
+          },
+        },
+      },
     });
+
     if (!event) return false;
 
     try {
-      // delete the banner from S3
+      // Delete the banner from S3
       if (event.imageUrl) {
         await this.storage.delete(event.imageUrl);
       }
-      // then delete the DB record
+
+      // Delete all ticket files (if any)
+      for (const ticket of event.tickets) {
+        const paths = [ticket.qrCodePath, ticket.pdfPath].filter(Boolean);
+        for (const path of paths) {
+          if (typeof path === 'string') {
+            await this.storage.delete(path);
+          }
+        }
+      }
+
+      // Delete the Event
       await this.prisma.event.delete({ where: { id } });
+
       return true;
-    } catch {
+    } catch (error) {
+        console.warn('Error during event deletion:', error);
       return false;
     }
   }
