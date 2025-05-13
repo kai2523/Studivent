@@ -6,15 +6,16 @@ import { join } from 'path';
 import { TicketModule } from './ticket/ticket.module';
 import { ApiKeyGuard } from './auth/api-key.guard';
 
-
 @Module({
-  imports: [ConfigModule.forRoot({
-    isGlobal: true,
-    envFilePath: [join(__dirname, '..', '..', '.env')],
-  }),
-  EventModule,
-  PrismaModule,
-  TicketModule,],
-  providers: [ApiKeyGuard]
+  imports: [
+    ConfigModule.forRoot({
+      isGlobal: true,
+      envFilePath: [join(__dirname, '..', '..', '.env')],
+    }),
+    EventModule,
+    PrismaModule,
+    TicketModule,
+  ],
+  providers: [ApiKeyGuard],
 })
 export class AppModule {}

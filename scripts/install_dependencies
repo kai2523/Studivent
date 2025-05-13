@@ -1,41 +1,73 @@
 #!/bin/bash
 set -euo pipefail
 
-echo "🚀 Starte install_dependencies Skript..."
-echo "📂 Aktuelles Verzeichnis (vor mkdir): $(pwd)"
+echo "Starte install_dependencies Skript..."
+echo "Aktuelles Verzeichnis: $(pwd)"
 
-# 1) Erstelle /var/www/html mit root-Rechten und gib ubuntu den Besitz
+# 1) Web-Root anlegen & Rechte setzen
 sudo mkdir -p /var/www/html
-sudo chown ubuntu:ubuntu /var/www/html
-echo "📁 Verzeichnis /var/www/html erstellt und Besitz auf ubuntu gesetzt."
+sudo chown -R ubuntu:ubuntu /var/www/html
+cd /var/www/html
 
-# 2) Wechsel in den Web-Root (dort wird später deployt)
-cd /var/www/html || {
-  echo "❌ Fehler: /var/www/html existiert nicht oder konnte nicht betreten werden."
-  exit 1
-}
-echo "📂 Neues Arbeitsverzeichnis: $(pwd)"
+# 2) Node.js ≥20 installieren
+export DEBIAN_FRONTEND=noninteractive
+curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
+sudo apt-get update
+sudo apt-get install -y nodejs
 
-# 3) Node.js (inkl. npm) installieren, falls noch nicht vorhanden
-if ! command -v npm &> /dev/null; then
-  echo "📦 Node.js wird installiert..."
-  curl -fsSL https://deb.nodesource.com/setup_18.x | sudo -E bash -
-  sudo apt-get update -y
-  sudo apt-get install -y nodejs
-else
-  echo "✅ Node.js ist bereits installiert. Version: $(node -v) / npm $(npm -v)"
+# 3) Yarn (wenn noch nicht da)
+if ! command -v yarn &> /dev/null; then
+  curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | sudo apt-key add -
+  echo "deb https://dl.yarnpkg.com/debian stable main" \
+    | sudo tee /etc/apt/sources.list.d/yarn.list
+  sudo apt-get update
+  sudo apt-get install -y yarn
 fi
 
-# 4) Abhängigkeiten installieren (falls package.json da ist)
-echo "📄 Dateien im aktuellen Verzeichnis:"
-ls -la
+# ── BACKEND ──────────────────────────────────────
+cd /var/www/html/backend
+echo "→ Backend aufräumen"
+rm -rf node_modules
+sudo chown -R ubuntu:ubuntu .
 
-if [ -f "package.json" ]; then
-  echo "📦 package.json gefunden – führe 'npm install' aus..."
-  sudo npm install
-  echo "✅ npm install erfolgreich abgeschlossen."
+echo "→ Backend: Dependencies & Build"
+yarn install --silent
+yarn build
+yarn install --production --silent
+
+mkdir -p logs
+echo "Backend fertig."
+
+# ── FRONTEND ─────────────────────────────────────
+cd /var/www/html/frontend
+echo "→ Frontend aufräumen"
+rm -rf node_modules
+sudo chown -R ubuntu:ubuntu .
+
+echo "→ Frontend: Dependencies installieren"
+if [ -f package-lock.json ]; then
+  npm ci \
+    --silent \
+    --prefer-offline \
+    --no-audit \
+    --progress=false \
+    --jobs=4
 else
-  echo "⚠️ Keine package.json gefunden – npm install übersprungen."
+  npm install \
+    --silent \
+    --prefer-offline \
+    --no-audit \
+    --progress=false \
+    --jobs=4
 fi
 
-echo "✅ install_dependencies vollständig durchgelaufen."
+echo "→ Frontend: Production-Build"
+npx ng build --configuration production
+
+echo "→ Frontend ausliefern"
+rm -rf /var/www/html/dist
+mkdir -p /var/www/html/dist
+cp -R dist/studivent/* /var/www/html/dist
+sudo chown -R ubuntu:ubuntu /var/www/html/dist
+
+echo "install_dependencies abgeschlossen!"

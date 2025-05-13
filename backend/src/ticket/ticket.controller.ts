@@ -1,4 +1,14 @@
-import { Body, Controller, Get, Param, ParseIntPipe, Post, Res, StreamableFile, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  ParseIntPipe,
+  Post,
+  Res,
+  StreamableFile,
+  UseGuards,
+} from '@nestjs/common';
 import { TicketService } from './ticket.service';
 import { CreateTicketDto, ValidateTicketDto } from './dto';
 import { Response } from 'express';
@@ -8,40 +18,39 @@ import { ApiKeyGuard } from 'src/auth/api-key.guard';
 @UseGuards(ApiKeyGuard)
 @Controller('tickets')
 export class TicketController {
-    constructor(
-      private ticketService: TicketService,
-      private readonly storage: StorageService,
-    ) {}
-    
-    @Post()
-    create(@Body() dto: CreateTicketDto) {
-      return this.ticketService.create(dto);
-    }
+  constructor(
+    private ticketService: TicketService,
+    private readonly storage: StorageService,
+  ) {}
 
-    @Get(':id/pdf')
-    async pdf(
-      @Param('id', ParseIntPipe) id: number,
-      @Res({ passthrough: true }) res: Response,
-    ): Promise<StreamableFile> {
-      const path = await this.ticketService.getPdfPath(id);
-      const fileBuffer = await this.storage.get(path);
-    
-      res.set({
-        'Content-Type': 'application/pdf',
-        'Content-Disposition': `inline; filename="ticket-${id}.pdf"`,
-      });
-    
-      return new StreamableFile(fileBuffer);
-    }    
+  @Post()
+  create(@Body() dto: CreateTicketDto) {
+    return this.ticketService.create(dto);
+  }
 
-    @Get(':id')
-    findOne(@Param('id', ParseIntPipe) id: number) {
-      return this.ticketService.findOne(id);
-    }
+  @Get(':id/pdf')
+  async pdf(
+    @Param('id', ParseIntPipe) id: number,
+    @Res({ passthrough: true }) res: Response,
+  ): Promise<StreamableFile> {
+    const path = await this.ticketService.getPdfPath(id);
+    const fileBuffer = await this.storage.get(path);
 
-    @Post('validate')
-    validate(@Body() dto: ValidateTicketDto) {
-      return this.ticketService.validate(dto.code);
-    }
+    res.set({
+      'Content-Type': 'application/pdf',
+      'Content-Disposition': `inline; filename="ticket-${id}.pdf"`,
+    });
 
+    return new StreamableFile(fileBuffer);
+  }
+
+  @Get(':id')
+  findOne(@Param('id', ParseIntPipe) id: number) {
+    return this.ticketService.findOne(id);
+  }
+
+  @Post('validate')
+  validate(@Body() dto: ValidateTicketDto) {
+    return this.ticketService.validate(dto.code);
+  }
 }
