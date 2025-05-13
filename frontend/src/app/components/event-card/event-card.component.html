@@ -12,8 +12,16 @@
       <i *ngIf="event.booked" class="fas fa-download ms-2" style="cursor: pointer; font-size: 1rem;" (click)="onDownloadPdf()"></i>
     </h5>
     <p class="card-text m-0">
-      <i class="fas fa-map-marker-alt me-1"></i> {{ event.location }}
-      <i class="fas fa-calendar-alt ms-3 me-1"></i> {{ event.date }}
+      <i class="fas fa-map-marker-alt me-1"></i>
+      <a
+        [href]="'https://www.google.com/maps/search/?api=1&query=' + event.location.latitude + ',' + event.location.longitude"
+        target="_blank"
+        rel="noopener noreferrer"
+        class="text-reset text-decoration-none"
+      >
+        {{ event.location.name }}
+      </a>
+      <i class="fas fa-calendar-alt ms-3 me-1"></i> {{ event.date | date:'dd.MM.yyyy' }}
     </p>
 
     <button class="btn btn-primary w-100 mt-2" (click)="toggleDetailMode()">
@@ -30,12 +38,20 @@
 >
   <!-- Close button -->
   <p
-    class="position-absolute top-0 end-0 m-3"
-    (click)="toggleDetailMode()"
-    style="font-size: 1.5rem;"
-  >
-    &times;
-  </p>
+  class="position-absolute top-0 end-0 m-3 text-white"
+  (click)="toggleDetailMode()"
+  style="
+    font-size: 1.5rem;
+    cursor: pointer;
+    background-color: rgba(0, 0, 0, 0.3);
+    border-radius: 8px;
+    padding: 4px 8px;
+  "
+  aria-label="Close"
+>
+  <i class="fas fa-xmark"></i>
+</p>
+
 
   <img [src]="event.imageUrl" class="img-fluid" alt="Event image" />
 
@@ -45,21 +61,29 @@
     </h2>
 
     <p class="mb-1">
-      <i class="fas fa-calendar-alt me-1"></i> {{ event.date }}
-      <i class="fas fa-map-marker-alt ms-2 me-1"></i> {{ event.location }}
-      <i class="fas fa-clock ms-2 me-1"></i> {{ event.time }}
+      <i class="fas fa-calendar-alt me-1"></i> {{ event.date | date:'dd.MM.yyyy' }}
+      <i class="fas fa-map-marker-alt ms-2 me-1"></i> 
+      <a
+      [href]="'https://www.google.com/maps/search/?api=1&query=' + event.location.latitude + ',' + event.location.longitude"
+      target="_blank"
+      rel="noopener noreferrer"
+      class="text-reset text-decoration-none"
+    >
+      {{ event.location.name }}
+    </a>
+      <i class="fas fa-clock ms-2 me-1"></i> {{ event.date | date:'HH:mm' }}
     </p>
     
     <p>{{ event.description }}</p>
     
     <p class="m-0">
       <strong>
-        <i class="fas fa-user me-1"></i> {{ event.contactPerson }}
+        <i class="fas fa-user me-1"></i> {{ event.contact }}
       </strong>
     </p>
 
     <div class="mt-2">
-      <button class="btn btn-primary w-100">
+      <button class="btn btn-primary w-100" disabled="true">
         {{ event.booked ? 'Weitere Tickets buchen' : 'Eventtickets Buchen' }}
       </button>
     </div>
