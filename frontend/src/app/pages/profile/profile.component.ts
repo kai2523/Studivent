@@ -1,19 +1,51 @@
 import { Component } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import { Location } from '@angular/common';
 import { Router } from '@angular/router';
+import { PageHeaderComponent } from '../../shared/page-header/page-header.component';
 
 @Component({
   selector: 'app-profile',
-  imports: [],
+  standalone: true, // ✅ confirms it's standalone
+  imports: [
+    CommonModule,
+    FormsModule,
+    PageHeaderComponent // Optional if using Angular wrapper instead of CSS
+  ],
   templateUrl: './profile.component.html',
-  styleUrl: './profile.component.scss'
+  styleUrls: ['./profile.component.scss']
 })
 export class ProfileComponent {
 
   // Constructor goes here
-  constructor(private router: Router) {}
-  
-  goToEvents() {
-    this.router.navigate(['/events']);
+  user = {
+    username: 'Max Mustermann',
+    email: 'max.mustermann.22@heilbronn.dhbw.de'
+  };
+
+  emailUpdates = false;
+  isAdmin = false;
+
+  constructor(
+    private location: Location,
+    private router: Router
+  ) {}
+
+  goBack() {
+    this.location.back();
   }
 
+  toggleEmailUpdates() {
+    // persist change
+    console.log("Email Updates toggled!")
+  }
+
+  logout() {
+    console.log("Logout!")
+  }
+
+  goTo(route: string) {
+    this.router.navigate([route]);
+  }
 }
