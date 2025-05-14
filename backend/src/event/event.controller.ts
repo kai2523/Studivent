@@ -14,6 +14,7 @@ import {
 import { EventService } from './event.service';
 import { CreateEventDto, EditEventDto } from './dto';
 import { ApiKeyGuard } from 'src/auth/api-key.guard';
+//import { SessionGuard } from 'src/auth/auth.guard';
 
 @UseGuards(ApiKeyGuard)
 @Controller('events')
