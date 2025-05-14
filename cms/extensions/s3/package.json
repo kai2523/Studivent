@@ -28,5 +28,9 @@
 		"@directus/extensions-sdk": "13.1.0",
 		"@types/node": "^22.15.17",
 		"typescript": "^5.8.3"
+	},
+	"dependencies": {
+		"@aws-sdk/client-s3": "^3.808.0",
+		"dotenv": "^16.5.0"
 	}
 }

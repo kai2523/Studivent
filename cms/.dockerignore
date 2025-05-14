@@ -1,0 +1,8 @@
+node_modules
+.env
+ecosystem.config.js
+
+extensions/**/dist
+extensions/**/node_modules
+extensions/**/package-lock.json
+extensions/**/.gitignore

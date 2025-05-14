@@ -8,7 +8,12 @@ import { createClient } from 'redis';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
-  const redisClient = createClient({ legacyMode: true } as any);
+  const redisClient = createClient({
+    socket: {
+      host: process.env.REDIS_HOST,
+      port: Number(process.env.REDIS_PORT),
+    },
+  });
   await redisClient.connect();
 
   app.useGlobalPipes(
@@ -37,7 +42,6 @@ async function bootstrap() {
       },
     }),
   );
-
 
   app.enableCors({
     origin: ['http://localhost:4200', 'https://studivent-dhbw.de'],
