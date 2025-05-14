@@ -16,4 +16,5 @@ EXPOSE 3000
 
 CMD ["node", "dist/main"]
 
-HEALTHCHECK --interval=5m --timeout=10s --retries=3 CMD curl -f http://localhost:3000/health || exit 1
+HEALTHCHECK --interval=5m --timeout=10s --retries=3 \
+  CMD wget --spider -q http://localhost:3000/health || exit 1

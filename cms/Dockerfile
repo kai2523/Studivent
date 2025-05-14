@@ -18,4 +18,5 @@ WORKDIR /directus
 # Only copy built output
 COPY --from=builder /app/extensions /directus/extensions
 
-HEALTHCHECK --interval=5m --timeout=10s --retries=3 CMD curl -f http://localhost:8055/server/ping || exit 1
+HEALTHCHECK --interval=5m --timeout=10s --retries=3 \
+  CMD wget --spider -q http://localhost:8055/server/ping || exit 1
