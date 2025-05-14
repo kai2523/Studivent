@@ -1,7 +1,6 @@
 FROM node:22-alpine
 
 WORKDIR /app
-
 COPY package*.json ./
 
 RUN yarn install
@@ -9,7 +8,6 @@ RUN yarn install
 COPY . .
 
 RUN npx prisma generate
-
 RUN yarn build
 
 EXPOSE 3000
