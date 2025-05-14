@@ -7,6 +7,7 @@ import { TicketModule } from './ticket/ticket.module';
 import { ApiKeyGuard } from './auth/api-key.guard';
 import { AuthModule } from './auth/auth.module';
 import { ShibMiddleware } from './auth/shib.middleware';
+import { HealthModule } from './health/health.module';
 
 @Module({
   imports: [
@@ -17,7 +18,8 @@ import { ShibMiddleware } from './auth/shib.middleware';
     EventModule,
     PrismaModule,
     TicketModule,
-    AuthModule
+    AuthModule,
+    HealthModule
   ],
   providers: [ApiKeyGuard],
 })
