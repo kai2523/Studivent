@@ -22,13 +22,15 @@ export class TicketService {
   ) {}
 
   async create({ ownerEmail, eventId, quantity }: CreateTicketDto) {
-    const event = await this.prisma.event.findUnique({ where: { id: eventId } });
+    const event = await this.prisma.event.findUnique({
+      where: { id: eventId },
+    });
     if (!event) throw new NotFoundException('Event not found');
 
     const freshTickets = await this.prisma.$transaction(async (tx) => {
       const { count } = await tx.event.updateMany({
         where: { id: eventId, totalTickets: { gte: quantity } },
-        data:  { totalTickets: { decrement: quantity } },
+        data: { totalTickets: { decrement: quantity } },
       });
       if (!count) throw new BadRequestException('Not enough tickets left');
 
@@ -57,18 +59,22 @@ export class TicketService {
         const pdfBytes = await this.pdf.build({
           qr: qrPng,
           eventTitle: event.title,
-          eventDate:  event.date,
+          eventDate: event.date,
           ownerEmail,
-          ticketId:   ticket.id,
+          ticketId: ticket.id,
         });
 
         const dir = `tickets/${ticket.id}`;
-        await this.storage.put(`${dir}/qr.png`,     qrPng,  'image/png');
-        await this.storage.put(`${dir}/ticket.pdf`, pdfBytes,'application/pdf');
+        await this.storage.put(`${dir}/qr.png`, qrPng, 'image/png');
+        await this.storage.put(
+          `${dir}/ticket.pdf`,
+          pdfBytes,
+          'application/pdf',
+        );
 
         await this.prisma.ticket.update({
           where: { id: ticket.id },
-          data:  { qrCodePath: `${dir}/qr.png`, pdfPath: `${dir}/ticket.pdf` },
+          data: { qrCodePath: `${dir}/qr.png`, pdfPath: `${dir}/ticket.pdf` },
         });
       }),
     );
@@ -84,7 +90,6 @@ export class TicketService {
         eventId: t.eventId,
       })),
     };
-    
   }
 
   async findOne(id: number) {
@@ -101,10 +106,10 @@ export class TicketService {
       },
     });
     if (!ticket) throw new NotFoundException('Ticket not found');
-    return ticket;                              
+    return ticket;
   }
 
-  async getPdfPath(id: number, expires = 60 * 60): Promise<string> {
+  async getPdfPath(id: number): Promise<string> {
     const ticket = await this.prisma.ticket.findUnique({
       where: { id },
       select: { pdfPath: true },
@@ -119,26 +124,25 @@ export class TicketService {
 
   async validate(code: string) {
     const ticket = await this.prisma.ticket.findUnique({ where: { code } });
-  
+
     if (!ticket) {
       throw new BadRequestException('Ticket not found');
     }
-  
+
     if (ticket.validatedAt !== null) {
       throw new BadRequestException('Ticket already validated');
     }
-  
+
     await this.prisma.ticket.update({
       where: { id: ticket.id },
-      data:  { validatedAt: new Date() },
+      data: { validatedAt: new Date() },
     });
-  
+
     return {
-      ok        : true,
-      ticketId  : ticket.id,
-      owner     : ticket.ownerEmail,
-      validated : new Date(),
+      ok: true,
+      ticketId: ticket.id,
+      owner: ticket.ownerEmail,
+      validated: new Date(),
     };
   }
-
 }

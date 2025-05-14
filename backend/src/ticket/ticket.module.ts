@@ -8,6 +8,6 @@ import { StorageModule } from '../infra/storage/storage.module';
 @Module({
   imports: [QrModule, PdfModule, StorageModule],
   controllers: [TicketController],
-  providers: [TicketService]
+  providers: [TicketService],
 })
 export class TicketModule {}

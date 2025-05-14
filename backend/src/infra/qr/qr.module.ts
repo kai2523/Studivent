@@ -3,6 +3,6 @@ import { QrCodeService } from './qr-code.service';
 
 @Module({
   providers: [QrCodeService],
-  exports:   [QrCodeService],
+  exports: [QrCodeService],
 })
 export class QrModule {}

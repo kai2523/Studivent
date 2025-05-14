@@ -17,7 +17,7 @@ describe('App e2e', () => {
     app.useGlobalPipes(
       new ValidationPipe({
         whitelist: true,
-        transform: true
+        transform: true,
       }),
     );
     await app.init();
@@ -62,7 +62,7 @@ describe('App e2e', () => {
       city: 'TicketCity',
       country: 'TicketLand',
       latitude: 40.7128,
-      longitude: -74.0060,
+      longitude: -74.006,
     },
   };
 
@@ -82,7 +82,7 @@ describe('App e2e', () => {
           .post('/events')
           .withBody(mockEvent)
           .expectStatus(201)
-          .stores('eventId', 'id') 
+          .stores('eventId', 'id');
       });
     });
 
@@ -153,7 +153,6 @@ describe('App e2e', () => {
   });
 
   describe('Ticket', () => {
-
     describe('Create prerequisite Event', () => {
       it('should create an event to attach tickets to', () => {
         return pactum
@@ -181,7 +180,7 @@ describe('App e2e', () => {
               },
             ],
           })
-          .stores('ticketId', 'tickets[0].id') 
+          .stores('ticketId', 'tickets[0].id')
           .stores('ticketCode', 'tickets[0].code');
       });
     });
@@ -199,12 +198,9 @@ describe('App e2e', () => {
             ownerEmail: mockTicket.ownerEmail,
           });
       });
-    
+
       it('should return 404 for a non-existing ticket', () => {
-        return pactum
-          .spec()
-          .get('/tickets/999999')
-          .expectStatus(404);
+        return pactum.spec().get('/tickets/999999').expectStatus(404);
       });
     });
 
@@ -220,26 +216,26 @@ describe('App e2e', () => {
             ticketId: '$S{ticketId}',
           });
       });
-    
+
       it('should not validate the ticket again', () => {
         return pactum
           .spec()
           .post('/tickets/validate')
           .withBody({ code: '$S{ticketCode}' })
-          .expectStatus(400) 
+          .expectStatus(400)
           .expectBodyContains('Ticket already validated');
       });
-    
+
       it('should fail to validate a non-existing code', () => {
         return pactum
           .spec()
           .post('/tickets/validate')
-          .withBody({ code: '00000000-0000-0000-0000-000000000000' }) 
+          .withBody({ code: '00000000-0000-0000-0000-000000000000' })
           .expectStatus(400)
           .expectBodyContains('Ticket not found');
       });
     });
-    
+
     describe('Get Ticket PDF', () => {
       it('should return the ticket PDF file', () => {
         return pactum
@@ -249,8 +245,6 @@ describe('App e2e', () => {
           .expectStatus(200)
           .expectHeader('content-type', 'application/pdf');
       });
-    });    
-
+    });
   });
-
 });
