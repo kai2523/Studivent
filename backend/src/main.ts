@@ -1,17 +1,43 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { ValidationPipe } from '@nestjs/common';
-import { ApiKeyGuard } from './auth/api-key.guard';
-import { ConfigService } from '@nestjs/config';
+import * as session from 'express-session';
+import { RedisStore } from 'connect-redis';
+import { createClient } from 'redis';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+
+  const redisClient = createClient({ legacyMode: true } as any);
+  await redisClient.connect();
+
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true,
       transform: true,
     }),
   );
+
+  const sessionSecret = process.env.SESSION_SECRET;
+  if (!sessionSecret) {
+    throw new Error('SESSION_SECRET is not defined!');
+  }
+
+  app.use(
+    session({
+      store: new RedisStore({client: redisClient}),
+      secret: sessionSecret,
+      resave: false,
+      saveUninitialized: false,
+      cookie: {
+        httpOnly: true,
+        secure: true,            
+        sameSite: 'strict',      
+        maxAge: 1000 * 60 * 30,
+      },
+    }),
+  );
+
 
   app.enableCors({
     origin: ['http://localhost:4200', 'https://studivent-dhbw.de'],
@@ -24,10 +50,7 @@ async function bootstrap() {
       'Accept',
       'x-api-key',
     ],
-  });
-  const configService = app.get(ConfigService);
-  app.useGlobalGuards(new ApiKeyGuard(configService));
-
+  });  
   await app.listen(process.env.PORT ?? 3000);
 }
 bootstrap();
