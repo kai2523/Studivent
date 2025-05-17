@@ -8,9 +8,9 @@ export class ShibMiddleware implements NestMiddleware {
     if (req.path !== '/auth/login') return next();
 
     req.shib = {
-      email: req.headers['x-shib-mail'] as string,
+      email: req.headers['x-mail'] as string,
       givenName: req.headers['x-givenname'] as string,
-      sn:    req.headers['x-surname'] as string,
+      sn:    req.headers['x-sn'] as string,
     };
 
     next();

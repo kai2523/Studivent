@@ -9,9 +9,9 @@ export class AuthController {
   @Get('login')
   async login(@Req() req: Request, @Res() res: Response) {
 
-    const email = req.headers['x-shib-mail'] as string;
+    const email = req.headers['x-mail'] as string;
     const givenName = req.headers['x-givenname'] as string;
-    const sn = req.headers['x-surname'] as string;
+    const sn = req.headers['x-sn'] as string;
     
     const user = await this.prisma.user.upsert({
       where: { email },
