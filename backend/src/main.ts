@@ -38,7 +38,7 @@ async function bootstrap() {
         domain: '.studivent-dhbw.de',
         httpOnly: true,
         secure: true,            
-        sameSite: 'strict',      
+        sameSite: 'none',      
         maxAge: 1000 * 60 * 30,
       },
     }),
