@@ -7,12 +7,9 @@ export class AuthController {
   constructor(private readonly prisma: PrismaService) {}
 
   @Get('login')
-  async login(@Req() req: Request, @Res() res: Response) {
+  async login(@Req() req: Request & { shib?: any }, @Res() res: Response) {
 
-    console.log('Request headers:', req.headers);
-    const email = req.headers['x-mail'] as string;
-    const givenName = req.headers['x-givenname'] as string;
-    const sn = req.headers['x-sn'] as string;
+   const { email, givenName, sn } = req.shib;
     
     const user = await this.prisma.user.upsert({
       where: { email },
