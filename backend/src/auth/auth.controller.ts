@@ -12,7 +12,10 @@ export class AuthController {
     console.log('Request headers:', req.headers);
     const email = req.headers['x-mail'] as string;
     const givenName = req.headers['x-givenname'] as string;
-    const sn = req.headers['x-sn'] as string;
+    //const sn = req.headers['x-sn'] as string;
+    const snRaw = req.headers['x-sn'];
+    const sn = Buffer.from(snRaw as string, 'latin1').toString('utf8');
+
     
     const user = await this.prisma.user.upsert({
       where: { email },
