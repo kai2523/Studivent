@@ -1,17 +1,19 @@
 import {
   Body,
   Controller,
+  ForbiddenException,
   Get,
   Param,
   ParseIntPipe,
   Post,
+  Req,
   Res,
   StreamableFile,
   UseGuards,
 } from '@nestjs/common';
 import { TicketService } from './ticket.service';
 import { CreateTicketDto, ValidateTicketDto } from './dto';
-import { Response } from 'express';
+import { Request, Response } from 'express';
 import { StorageService } from '../infra/storage/storage.interface';
 import { ApiKeyGuard } from 'src/auth/api-key.guard';
 
@@ -24,8 +26,13 @@ export class TicketController {
   ) {}
 
   @Post()
-  create(@Body() dto: CreateTicketDto) {
-    return this.ticketService.create(dto);
+  create(@Body() dto: CreateTicketDto, @Req() req: Request) {
+    const userId = req.session.user?.userId;
+    if (!userId) {
+      throw new Error('User not authenticated');
+    }
+
+    return this.ticketService.create(userId, dto);
   }
 
   @Get(':id/pdf')
@@ -47,6 +54,16 @@ export class TicketController {
   @Get(':id')
   findOne(@Param('id', ParseIntPipe) id: number) {
     return this.ticketService.findOne(id);
+  }
+
+  @Get('/mine')
+  getMyTickets(@Req() req: Request) {
+    if (!req.session?.user) {
+      throw new ForbiddenException('User not logged in');
+    }
+    const userId = req.session.user.userId;
+
+    return this.ticketService.getTicketsForUser(userId);
   }
 
   @Post('validate')

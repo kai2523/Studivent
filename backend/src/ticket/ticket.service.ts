@@ -21,7 +21,7 @@ export class TicketService {
     private readonly storage: StorageService,
   ) {}
 
-  async create({ ownerEmail, eventId, quantity }: CreateTicketDto) {
+  async create(userId: number, { ownerEmail, eventId, quantity }: CreateTicketDto) {
     const event = await this.prisma.event.findUnique({
       where: { id: eventId },
     });
@@ -38,7 +38,7 @@ export class TicketService {
       for (let i = 0; i < quantity; i++) {
         promises.push(
           tx.ticket.create({
-            data: { ownerEmail, eventId },
+            data: { ownerEmail, eventId, userId },
             select: {
               id: true,
               code: true,
@@ -144,5 +144,12 @@ export class TicketService {
       owner: ticket.ownerEmail,
       validated: new Date(),
     };
+  }
+
+  async getTicketsForUser(userId: number) {
+    return this.prisma.ticket.findMany({
+        where: { userId },
+        include: { event: true },
+    });
   }
 }
