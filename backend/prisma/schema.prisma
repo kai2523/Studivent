@@ -8,11 +8,12 @@ datasource db {
 }
 
 model User {
-  id        Int      @id @default(autoincrement())
-  email     String   @unique
-  firstName String   @map("first_name")
-  lastName  String   @map("last_name")
-  tickets   Ticket[]
+  id            Int      @id @default(autoincrement())
+  persistentId  String   @unique @map("persistent_id") 
+  email         String   
+  firstName     String   @map("first_name")
+  lastName      String   @map("last_name")
+  tickets       Ticket[]
 
   @@map("users")
 }

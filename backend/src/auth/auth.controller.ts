@@ -9,12 +9,17 @@ export class AuthController {
   @Get('login')
   async login(@Req() req: Request & { shib?: any }, @Res() res: Response) {
 
-   const { email, givenName, sn } = req.shib;
+    const { email, givenName, sn, persistentId } = req.shib;
     
     const user = await this.prisma.user.upsert({
-      where: { email },
-      update: {},
+      where: { persistentId },
+      update: {
+        email,
+        firstName: givenName,
+        lastName: sn,
+      },
       create: {
+        persistentId,
         email,
         firstName: givenName,
         lastName: sn,
