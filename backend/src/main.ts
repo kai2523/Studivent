@@ -4,9 +4,11 @@ import { ValidationPipe } from '@nestjs/common';
 import * as session from 'express-session';
 import { RedisStore } from 'connect-redis';
 import { createClient } from 'redis';
+import { NestExpressApplication } from '@nestjs/platform-express';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create<NestExpressApplication>(AppModule);
+  app.set('trust proxy', 1);
 
   const redisClient = createClient({
     socket: {
@@ -34,7 +36,9 @@ async function bootstrap() {
       secret: sessionSecret,
       resave: false,
       saveUninitialized: false,
+      proxy: true,
       cookie: {
+        domain: 'studivent-dhbw.de',
         httpOnly: true,
         secure: true,            
         sameSite: 'none',      
