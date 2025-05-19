@@ -35,7 +35,6 @@ async function bootstrap() {
       resave: false,
       saveUninitialized: false,
       cookie: {
-        domain: '.studivent-dhbw.de',
         httpOnly: true,
         secure: true,            
         sameSite: 'none',      
