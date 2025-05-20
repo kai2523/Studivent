@@ -61,6 +61,10 @@ export class EditEventDto {
   @IsOptional()
   totalTickets?: number;
 
+  @IsNumber()
+  @IsOptional()
+  priceCents?: number;
+
   @ValidateNested()
   @IsOptional()
   @Type(() => EditLocationDto)

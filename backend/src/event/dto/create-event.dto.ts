@@ -56,6 +56,9 @@ export class CreateEventDto {
   @IsNumber()
   totalTickets: number;
 
+  @IsNumber()
+  priceCents: number;
+
   @ValidateNested()
   @Type(() => CreateLocationDto)
   location: CreateLocationDto;

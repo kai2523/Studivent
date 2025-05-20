@@ -12,7 +12,7 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { TicketService } from './ticket.service';
-import { CreateTicketDto, ValidateTicketDto } from './dto';
+import { ValidateTicketDto } from './dto';
 import { Request, Response } from 'express';
 import { StorageService } from '../infra/storage/storage.interface';
 import { ApiKeyGuard } from 'src/auth/api-key.guard';
@@ -21,18 +21,13 @@ import { ApiKeyGuard } from 'src/auth/api-key.guard';
 @Controller('tickets')
 export class TicketController {
   constructor(
-    private ticketService: TicketService,
+    private readonly ticketService: TicketService,
     private readonly storage: StorageService,
   ) {}
 
   @Post()
-  create(@Body() dto: CreateTicketDto, @Req() req: Request) {
-    const userId = req.session.user?.userId;
-    if (!userId) {
-      throw new Error('User not authenticated');
-    }
-
-    return this.ticketService.create(userId, dto);
+  create() {
+    throw new ForbiddenException('Direct ticket creation is not allowed. Use the payment process.');
   }
 
   @Get(':id/pdf')

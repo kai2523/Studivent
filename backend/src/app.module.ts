@@ -9,6 +9,7 @@ import { AuthModule } from './auth/auth.module';
 import { ShibMiddleware } from './auth/shib.middleware';
 import { HealthModule } from './health/health.module';
 import { UserModule } from './user/user.module';
+import { PaymentModule } from './payment/payment.module';
 
 @Module({
   imports: [
@@ -21,7 +22,8 @@ import { UserModule } from './user/user.module';
     TicketModule,
     AuthModule,
     HealthModule,
-    UserModule
+    UserModule,
+    PaymentModule
   ],
   providers: [ApiKeyGuard],
 })

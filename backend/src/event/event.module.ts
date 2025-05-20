@@ -8,5 +8,6 @@ import { StorageModule } from 'src/infra/storage/storage.module';
   imports: [PrismaModule, StorageModule],
   controllers: [EventController],
   providers: [EventService],
+  exports: [EventService],
 })
 export class EventModule {}

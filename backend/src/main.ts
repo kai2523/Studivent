@@ -4,11 +4,17 @@ import { ValidationPipe } from '@nestjs/common';
 import * as session from 'express-session';
 import { RedisStore } from 'connect-redis';
 import { createClient } from 'redis';
+import * as express from 'express';
 import { NestExpressApplication } from '@nestjs/platform-express';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
   app.set('trust proxy', 1);
+
+  app.use(
+    '/payment/webhook',
+    express.raw({ type: 'application/json' }),
+  );
 
   const redisClient = createClient({
     socket: {
@@ -59,6 +65,6 @@ async function bootstrap() {
       'x-api-key',
     ],
   });  
-  await app.listen(process.env.PORT ?? 3000);
+  await app.listen(3000);
 }
 bootstrap();

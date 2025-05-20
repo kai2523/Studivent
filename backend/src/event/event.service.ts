@@ -60,6 +60,7 @@ export class EventService {
         date: dto.date,
         contact: dto.contact,
         totalTickets: dto.totalTickets,
+        priceCents: dto.priceCents,
 
         location: {
           connectOrCreate: {
@@ -93,6 +94,7 @@ export class EventService {
         date: true,
         contact: true,
         totalTickets: true,
+        priceCents: true,
         location: true,
       },
     });
@@ -191,6 +193,7 @@ export class EventService {
         date: true,
         contact: true,
         totalTickets: true,
+        priceCents: true,
         imageUrl: true,
         location: true,
       },
