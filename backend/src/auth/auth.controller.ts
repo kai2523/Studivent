@@ -1,50 +1,18 @@
 import { Controller, Get, Req, Res } from '@nestjs/common';
 import { Request, Response } from 'express';
-import { PrismaService } from '../prisma/prisma.service';
+import { AuthService } from './auth.service';
 
 @Controller('auth')
 export class AuthController {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(private readonly authService: AuthService) {}
 
   @Get('login')
   async login(@Req() req: Request & { shib?: any }, @Res() res: Response) {
-
-    const  { email, givenName, surname, persistentId } = req.shib;
-    
-    const user = await this.prisma.user.upsert({
-      where: { persistentId },
-      update: {
-        email,
-        firstName: givenName,
-        lastName: surname,
-      },
-      create: {
-        persistentId,
-        email,
-        firstName: givenName,
-        lastName: surname,
-      },
-    });
-
-    req.session.user = {
-      userId: user.id,
-      email: user.email,
-    };
-    
-    return res.redirect('/event')
+    return this.authService.handleLogin(req, res);
   }
 
   @Get('logout')
   logout(@Req() req: Request, @Res() res: Response) {
-    req.session.destroy((err) => {
-      if (err) {
-        console.error('Fehler beim Logout:', err);
-        return res.status(500).send('Logout fehlgeschlagen');
-      }
-
-      res.clearCookie('connect.sid'); 
-      return res.redirect('/');
-    });
+    return this.authService.handleLogout(req, res);
   }
-
 }
