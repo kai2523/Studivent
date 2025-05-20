@@ -15,23 +15,26 @@ export class ShibMiddleware implements NestMiddleware {
     }
 
     const emailRaw     = req.headers['x-mail'] as string | undefined;
-    const displayNameRaw = req.headers['x-displayname'] as string | undefined;
+    const givenNameRaw = req.headers['x-givenname'] as string | undefined;
+    const surnameRaw = req.headers['x-sn'] as string | undefined;
     const persistentIdRaw = req.headers['x-persistent-id'] as string | undefined;
 
     const email     = decodeLatin1ToUtf8(emailRaw);
-    const displayName = decodeLatin1ToUtf8(displayNameRaw);
+    const givenName = decodeLatin1ToUtf8(givenNameRaw);
+    const surname = decodeLatin1ToUtf8(surnameRaw);
     const persistentId = decodeLatin1ToUtf8(persistentIdRaw);
 
-    if (!email || !displayName || !persistentId) {
+    if (!email || !givenName || !persistentId || !surname) {
       console.error('Missing or invalid Shibboleth headers:', {
         'x-mail': emailRaw,
-        'x-displayName': displayName,
+        'x-givenName': givenName,
+        'x-surname': surname,
         'x-persistent-id': persistentIdRaw,
       });
       throw new UnauthorizedException('Shibboleth headers missing');
     }
 
-    req.shib = { email, displayName, persistentId };
+    req.shib = { email, givenName, surname, persistentId };
     next();
   }
 }

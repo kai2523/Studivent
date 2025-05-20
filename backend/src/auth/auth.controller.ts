@@ -1,7 +1,6 @@
 import { Controller, Get, Req, Res } from '@nestjs/common';
 import { Request, Response } from 'express';
 import { PrismaService } from '../prisma/prisma.service';
-import * as humanparser from 'humanparser';
 
 @Controller('auth')
 export class AuthController {
@@ -10,24 +9,20 @@ export class AuthController {
   @Get('login')
   async login(@Req() req: Request & { shib?: any }, @Res() res: Response) {
 
-    const { email, displayName, persistentId } = req.shib;
-
-    const parsedName = humanparser.parseName(displayName);
-    const firstName = parsedName.firstName || '';
-    const lastName = parsedName.lastName || '';
+    const  { email, givenName, surname, persistentId } = req.shib;
     
     const user = await this.prisma.user.upsert({
       where: { persistentId },
       update: {
         email,
-        firstName,
-        lastName,
+        firstName: givenName,
+        lastName: surname,
       },
       create: {
         persistentId,
         email,
-        firstName,
-        lastName,
+        firstName: givenName,
+        lastName: surname,
       },
     });
 
