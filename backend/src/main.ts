@@ -9,12 +9,13 @@ import { NestExpressApplication } from '@nestjs/platform-express';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
-  app.set('trust proxy', 1);
 
   app.use(
     '/payment/webhook',
     express.raw({ type: 'application/json' }),
   );
+
+  app.set('trust proxy', 1);
 
   const redisClient = createClient({
     socket: {
@@ -24,21 +25,15 @@ async function bootstrap() {
   });
   await redisClient.connect();
 
-  app.useGlobalPipes(
-    new ValidationPipe({
-      whitelist: true,
-      transform: true,
-    }),
-  );
-
   const sessionSecret = process.env.SESSION_SECRET;
   if (!sessionSecret) {
     throw new Error('SESSION_SECRET is not defined!');
   }
 
-  app.use(
-    session({
-      store: new RedisStore({client: redisClient}),
+  app.use((req, res, next) => {
+    if (req.originalUrl === '/payment/webhook') return next();
+    return session({
+      store: new RedisStore({ client: redisClient }),
       secret: sessionSecret,
       resave: false,
       saveUninitialized: false,
@@ -46,10 +41,17 @@ async function bootstrap() {
       cookie: {
         domain: 'studivent-dhbw.de',
         httpOnly: true,
-        secure: true,            
-        sameSite: 'none',      
+        secure: true,
+        sameSite: 'none',
         maxAge: 1000 * 60 * 30,
       },
+    })(req, res, next);
+  });
+
+  app.useGlobalPipes(
+    new ValidationPipe({
+      whitelist: true,
+      transform: true,
     }),
   );
 
