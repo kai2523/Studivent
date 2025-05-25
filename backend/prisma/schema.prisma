@@ -10,7 +10,7 @@ datasource db {
 model User {
   id            Int      @id @default(autoincrement())
   persistentId  String   @unique @map("persistent_id") 
-  email         String   
+  email         String   @unique
   firstName     String   @map("first_name")
   lastName      String   @map("last_name")
   isAdmin       Boolean  @default(false)
@@ -51,7 +51,7 @@ model Ticket {
   code              String    @unique @default(uuid())
   validatedAt       DateTime? @map("validated_at")
   event             Event     @relation(fields: [eventId], references: [id], onDelete: Cascade)
-  user              User?     @relation(fields: [userId], references: [id])
+  user              User      @relation(fields: [userId], references: [id])
 
   @@index([eventId])
   @@index([userId])
