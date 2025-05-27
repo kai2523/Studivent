@@ -30,8 +30,13 @@ export class EventController {
   }
 
   @Get()
-  findAll() {
-    return this.eventService.findAll();
+  findAll(@Req() req: Request) {
+    const userId = req.session?.user?.userId;
+    if (!userId) {
+      throw new ForbiddenException('User not logged in');
+    }
+
+    return this.eventService.findAll(userId);
   }
 
   @Get(':id')
@@ -72,15 +77,4 @@ export class EventController {
   ) {
     return this.eventService.findTicketsForEvent(id, { page, size });
   }
-
-  @Get('with-my-tickets')
-  async getEventsAndMyTickets(@Req() req: Request) {
-    const userId = req.session?.user?.userId;
-    if (!userId) {
-      throw new ForbiddenException('User not logged in');
-    }
-
-    return this.eventService.getEventsAndTicketsForUser(userId);
-  }
-
 }
