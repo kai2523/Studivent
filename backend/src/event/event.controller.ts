@@ -8,13 +8,16 @@ import {
   ParseIntPipe,
   Patch,
   Post,
+  Req,
   Query,
   UseGuards,
+  ForbiddenException,
 } from '@nestjs/common';
+import { Request } from 'express';
 import { EventService } from './event.service';
 import { CreateEventDto, EditEventDto } from './dto';
+//import { SessionGuard } from '../auth/auth.guard';
 import { ApiKeyGuard } from 'src/auth/api-key.guard';
-//import { SessionGuard } from 'src/auth/auth.guard';
 
 @UseGuards(ApiKeyGuard)
 @Controller('events')
@@ -69,4 +72,15 @@ export class EventController {
   ) {
     return this.eventService.findTicketsForEvent(id, { page, size });
   }
+
+  @Get('with-my-tickets')
+  async getEventsAndMyTickets(@Req() req: Request) {
+    const userId = req.session?.user?.userId;
+    if (!userId) {
+      throw new ForbiddenException('User not logged in');
+    }
+
+    return this.eventService.getEventsAndTicketsForUser(userId);
+  }
+
 }

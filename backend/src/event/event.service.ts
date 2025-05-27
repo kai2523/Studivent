@@ -261,4 +261,28 @@ export class EventService {
       orderBy: { createdAt: 'asc' },
     });
   }
+
+  async getEventsAndTicketsForUser(userId: number) {
+    const events = await this.prisma.event.findMany({
+      include: { location: true },
+    });
+
+    const userTickets = await this.prisma.ticket.findMany({
+      where: { userId },
+      include: { event: true },
+    });
+
+    await Promise.all(
+      events.map(async (e) => {
+        if (e.imageUrl) {
+          e.imageUrl = await this.storage.getSignedUrl(e.imageUrl, 60 * 15);
+        }
+      }),
+    );
+
+    return {
+      events,
+      tickets: userTickets,
+    };
+  }
 }
