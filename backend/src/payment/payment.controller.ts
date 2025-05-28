@@ -5,7 +5,6 @@ import { TicketService } from '../ticket/ticket.service';
 import { UserService } from '../user/user.service';
 import { EventService } from '../event/event.service';
 import { SessionGuard } from '../auth/auth.guard';
-import { ApiKeyGuard } from '../auth/api-key.guard';
 import { CreateIntentDto } from './dto/create-intent.dto';
 import Stripe from 'stripe';
 import {
@@ -29,7 +28,7 @@ export class PaymentController {
     private readonly eventService: EventService,
   ) {}
 
-  @UseGuards(ApiKeyGuard)
+  @UseGuards(SessionGuard)
   @Post('create-intent')
   @ApiCookieAuth('connect.sid')
   @ApiOperation({ summary: 'Create a Stripe PaymentIntent for an event' })
