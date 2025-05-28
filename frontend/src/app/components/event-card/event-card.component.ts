@@ -9,6 +9,7 @@ import {
   StripeCardElement
 } from '@stripe/stripe-js';
 import { HttpClient } from '@angular/common/http';
+import { ChangeDetectorRef } from '@angular/core';
 
 @Component({
   selector: 'app-event-card',
@@ -37,7 +38,8 @@ export class EventCardComponent implements OnDestroy {
   constructor(
     private pdfService: PdfDownloadService,
     private router: Router,
-    private http: HttpClient
+    private http: HttpClient,
+    private cd: ChangeDetectorRef
   ) {
     loadStripe('pk_test_51RQpJWGHYQwFXMHiHQsZVHgUNuZ8q3cn94XR3s4iaGm3MSex7nBRPB1mZFQNW9J1YRUpEaQWNlsM3j5FDDSuB92M00VgBuQuJl')
       .then(s => (this.stripe = s))
@@ -134,12 +136,21 @@ export class EventCardComponent implements OnDestroy {
       })
       .subscribe(async ({ clientSecret }) => {
         this.clientSecret = clientSecret;
-        if (!this.stripe) return console.error('Stripe not initialized');
-        // set up Elements
+        if (!this.stripe) {
+          console.error('Stripe not initialized');
+          return;
+        }
+
+        // 1) Enable the paymentMode panel so <div #cardInfo> exists
+        this.paymentMode = true;
+
+        // 2) Let Angular render it & update the ViewChild
+        this.cd.detectChanges();
+
+        // 3) Now we can safely create and mount Stripe Elements
         this.elements = this.stripe.elements({ clientSecret });
         this.card = this.elements.create('card');
         this.card.mount(this.cardInfo.nativeElement);
-        this.paymentMode = true;
       });
   }
 
