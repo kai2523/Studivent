@@ -39,7 +39,7 @@ export class EventCardComponent implements OnDestroy {
     private router: Router,
     private http: HttpClient
   ) {
-    loadStripe('pk_test_YOUR_PUBLISHABLE_KEY')
+    loadStripe('pk_test_51RQpJWGHYQwFXMHiHQsZVHgUNuZ8q3cn94XR3s4iaGm3MSex7nBRPB1mZFQNW9J1YRUpEaQWNlsM3j5FDDSuB92M00VgBuQuJl')
       .then(s => (this.stripe = s))
       .catch(err => console.error('Stripe load error', err));
   }
