@@ -1,4 +1,33 @@
 <div class="container py-4">
-    <app-page-header [text]="'QR-Code Scannen'"></app-page-header>
-    <h2>QR-Code Scan</h2>
+  <app-page-header [text]="'QR-Code Scannen'"></app-page-header>
+  <ngx-scanner-qrcode
+    #scanner="scanner"
+    [config]="config">
+  </ngx-scanner-qrcode>
+
+  <div class="controls">
+    <button (click)="toggle()">
+      {{ scanner?.isStart ? 'Stop' : 'Start' }}
+    </button>
+    <button *ngIf="scanner?.isTorch" (click)="scanner.torcher()">
+      Toggle Flash
+    </button>
+  </div>
+
+  <!-- 1) show raw token while waiting -->
+  <pre *ngIf="scannedResult && isValid === null">{{ scannedResult }}</pre>
+
+  <!-- 2) valid: green check + message -->
+  <div *ngIf="isValid === true" class="text-center my-5">
+    <i class="fas fa-check-circle fa-6x text-success"></i>
+    <h1 class="text-success mt-3">Ticket OK!</h1>
+  </div>
+
+  <!-- 3) invalid: red cross + message -->
+  <div *ngIf="isValid === false" class="text-center my-5">
+    <i class="fas fa-times-circle fa-6x text-danger"></i>
+    <h1 class="text-danger mt-3">Ticket Invalide!</h1>
+  </div>
+
+  <p *ngIf="scanner?.isLoading">⌛ Initialising camera stream…</p>
 </div>

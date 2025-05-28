@@ -13,36 +13,39 @@ import { EventService } from '../../services/event.service';
   styleUrls: ['./events.component.scss']
 })
 export class EventsComponent implements OnInit {
+  events: any[] = [];
+  selectedTab = 0;
 
-  // Constructor goes here
   constructor(
     private router: Router,
     private eventService: EventService
   ) {}
 
-  events: any[] = [];
-
   ngOnInit(): void {
-    this.eventService.fetchEvents().subscribe((data) => {
+    this.eventService.fetchEvents().subscribe(data => {
       this.events = data;
+      console.log(data)
     });
   }
 
-  goToProfile() {
+  goToProfile(): void {
     this.router.navigate(['/profile']);
-  }
-
-  selectedTab: number = 0;
-
-  get filteredEvents(): Event[] {
-    return this.selectedTab === 1
-      ? this.events.filter(event => event.booked)
-      : this.events;
   }
 
   onTabChanged(tabIndex: number): void {
     this.selectedTab = tabIndex;
   }
 
+  /** 
+   * Tab 0: all events  
+   * Tab 1: only events with at least one ticket 
+   */
+  get filteredEvents(): any[] {
+    if (this.selectedTab === 1) {
+      return this.events.filter(
+        e => Array.isArray(e.tickets) && e.tickets.length > 0
+      );
+    }
+    return this.events;
+  }
 }
-

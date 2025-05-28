@@ -19,7 +19,10 @@ export class EventService {
       'X-API-KEY': this.apiKey,
     });
 
+    let res = this.http.get(this.apiUrl, { headers });
 
-    return this.http.get(this.apiUrl, { headers });
+    console.log(res)
+
+    return res;
   }
 }
