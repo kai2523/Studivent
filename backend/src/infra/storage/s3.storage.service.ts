@@ -36,11 +36,9 @@ export class S3StorageService implements StorageService {
   }
 
   async getSignedUrl(path: string, expires = 900) {
-    return presign(
-      this.client,
-      new GetObjectCommand({ Bucket: this.bucket, Key: path }),
-      { expiresIn: expires },
-    );
+    return presign(this.client, new GetObjectCommand({ Bucket: this.bucket, Key: path }), {
+      expiresIn: expires,
+    });
   }
 
   async get(path: string) {
@@ -51,7 +49,8 @@ export class S3StorageService implements StorageService {
 
       const chunks: Uint8Array[] = [];
       for await (const chunk of Body as Readable) {
-        chunks.push(typeof chunk === 'string' ? Buffer.from(chunk) : chunk);
+        const safeChunk = typeof chunk === 'string' ? Buffer.from(chunk) : (chunk as Uint8Array);
+        chunks.push(safeChunk);
       }
       return Buffer.concat(chunks);
     } catch {
@@ -68,9 +67,7 @@ export class S3StorageService implements StorageService {
         }),
       );
     } catch (err) {
-      throw new InternalServerErrorException(
-        `Failed to delete S3 object ${path}: ${err}`,
-      );
+      throw new InternalServerErrorException(`Failed to delete S3 object ${path}: ${err}`);
     }
   }
 }

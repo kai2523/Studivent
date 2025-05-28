@@ -14,12 +14,12 @@ export class ShibMiddleware implements NestMiddleware {
       return next();
     }
 
-    const emailRaw     = req.headers['x-mail'] as string | undefined;
+    const emailRaw = req.headers['x-mail'] as string | undefined;
     const givenNameRaw = req.headers['x-givenname'] as string | undefined;
     const surnameRaw = req.headers['x-sn'] as string | undefined;
     const persistentIdRaw = req.headers['x-persistent-id'] as string | undefined;
 
-    const email     = decodeLatin1ToUtf8(emailRaw);
+    const email = decodeLatin1ToUtf8(emailRaw);
     const givenName = decodeLatin1ToUtf8(givenNameRaw);
     const surname = decodeLatin1ToUtf8(surnameRaw);
     const persistentId = decodeLatin1ToUtf8(persistentIdRaw);

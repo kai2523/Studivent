@@ -4,6 +4,9 @@ import * as QRCode from 'qrcode';
 @Injectable()
 export class QrCodeService {
   async png(data: string): Promise<Buffer> {
-    return QRCode.toBuffer(data, { width: 300, errorCorrectionLevel: 'M' });
+    return await QRCode.toBuffer(data, {
+      width: 300,
+      errorCorrectionLevel: 'M',
+    });
   }
 }

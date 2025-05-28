@@ -1,12 +1,41 @@
 import { Controller, Get } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { createClient } from 'redis';
+import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 
+@ApiTags('Health')
 @Controller('health')
 export class HealthController {
   constructor(private readonly prisma: PrismaService) {}
 
   @Get()
+  @ApiOperation({
+    summary: 'Health check for the service, database, and Redis',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Returns the status of the service, Redis, and the database',
+    schema: {
+      example: {
+        status: 'ok',
+        redis: 'ok',
+        db: 'ok',
+        uptime: 123.456,
+      },
+    },
+  })
+  @ApiResponse({
+    status: 503,
+    description: 'Service unavailable if Redis or DB are down',
+    schema: {
+      example: {
+        status: 'fail',
+        redis: 'fail',
+        db: 'ok',
+        uptime: 456.789,
+      },
+    },
+  })
   async getHealth() {
     const redis = createClient({
       socket: {

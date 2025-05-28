@@ -1,12 +1,13 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { Request, Response } from 'express';
+import { ShibData } from './shib-data.interface';
 
 @Injectable()
 export class AuthService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async handleLogin(req: Request & { shib?: any }, res: Response): Promise<void> {
+  async handleLogin(req: Request & { shib: ShibData }, res: Response): Promise<void> {
     const { email, givenName, surname, persistentId } = req.shib;
 
     const user = await this.prisma.user.upsert({

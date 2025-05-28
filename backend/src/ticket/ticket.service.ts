@@ -1,8 +1,4 @@
-import {
-  BadRequestException,
-  Injectable,
-  NotFoundException,
-} from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { Prisma, Ticket, Event } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { QrCodeService } from '../infra/qr/qr-code.service';
@@ -41,30 +37,31 @@ export class TicketService {
 
     // Create ticket rows
     const tickets: PublicTicket[] = await Promise.all(
-      Array.from({ length: quantity }).map(() =>
-        tx.ticket.create({
-          data: {
-            ownerEmail,
-            eventId: event.id,
-            userId,
-            paymentIntentId,
-          },
-          select: {
-            id: true,
-            code: true,
-            createdAt: true,
-            bookedAt: true,
-            ownerEmail: true,
-            eventId: true,
-          },
-        }) as unknown as Prisma.PrismaPromise<PublicTicket>,
+      Array.from({ length: quantity }).map(
+        () =>
+          tx.ticket.create({
+            data: {
+              ownerEmail,
+              eventId: event.id,
+              userId,
+              paymentIntentId,
+            },
+            select: {
+              id: true,
+              code: true,
+              createdAt: true,
+              bookedAt: true,
+              ownerEmail: true,
+              eventId: true,
+            },
+          }) as unknown as Prisma.PrismaPromise<PublicTicket>,
       ),
     );
 
     // Artefacts
     await Promise.all(
       tickets.map(async (t) => {
-        const qrPng   = await this.qr.png(t.code);
+        const qrPng = await this.qr.png(t.code);
         const pdfBytes = await this.pdf.build({
           qr: qrPng,
           eventTitle: event.title,
@@ -96,7 +93,9 @@ export class TicketService {
   }) {
     const { userId, eventId, ownerEmail, paymentIntentId, quantity } = data;
 
-    const event = await this.prisma.event.findUnique({ where: { id: eventId } });
+    const event = await this.prisma.event.findUnique({
+      where: { id: eventId },
+    });
     if (!event) throw new NotFoundException('Event not found');
 
     const tickets = await this.prisma.$transaction((tx) =>
@@ -109,7 +108,7 @@ export class TicketService {
       }),
     );
 
-    return { quantity, tickets }; 
+    return { quantity, tickets };
   }
 
   async findTicketsByPaymentIntent(paymentIntentId: string) {
@@ -142,8 +141,7 @@ export class TicketService {
   async validate(code: string) {
     const ticket = await this.prisma.ticket.findUnique({ where: { code } });
     if (!ticket) throw new NotFoundException('Ticket not found');
-    if (ticket.validatedAt)
-      return { valid: false, message: 'Already validated' };
+    if (ticket.validatedAt) throw new BadRequestException('Ticket has already been validated');
 
     await this.prisma.ticket.update({
       where: { id: ticket.id },

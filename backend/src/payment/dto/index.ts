@@ -1,1 +1,1 @@
-export * from './create-intent.dto'
+export * from './create-intent.dto';
