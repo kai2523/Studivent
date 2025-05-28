@@ -8,7 +8,8 @@ import { QrCodeComponent } from './pages/qr-code/qr-code.component';
 import { ImpressumComponent } from './pages/impressum/impressum.component';
 
 export const routes: Routes = [
-    { path: '', component: EventsComponent },
+    { path: '', redirectTo: '/event', pathMatch: 'full' },
+    { path: 'event', component: EventsComponent },
     { path: 'profile', component: ProfileComponent },
     { path: 'privacy', component: PrivacyComponent },
     { path: 'help', component: HelpComponent },
