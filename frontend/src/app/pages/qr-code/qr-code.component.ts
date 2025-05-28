@@ -39,12 +39,13 @@ export class QrCodeComponent implements AfterViewInit {
   }
 
   ngAfterViewInit(): void {
+    console.log("Scanner initalized!")
     this.scanner.data
       .pipe(
         // only if we actually read something
         filter((res: ScannerQRCodeResult[]) => res?.length > 0),
         // throttle to 1 event per second
-        throttleTime(1000)
+        throttleTime(2000)
       )
       .subscribe((res: ScannerQRCodeResult[]) => {
         const token = res[0].value;
