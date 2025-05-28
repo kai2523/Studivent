@@ -11,6 +11,7 @@ import {
   Req,
   Query,
   UseGuards,
+  ForbiddenException,
 } from '@nestjs/common';
 import { Request } from 'express';
 import { EventService } from './event.service';
@@ -133,14 +134,11 @@ export class EventController {
     },
   })
   findAll(@Req() req: Request) {
-    /*
     const userId = req.session?.user?.userId;
-    
+
     if (!userId) {
       throw new ForbiddenException('User not logged in');
     }
-    */
-    const userId = 1;
 
     return this.eventService.findAll(userId);
   }
