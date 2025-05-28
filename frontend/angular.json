@@ -26,10 +26,12 @@
             "tsConfig": "tsconfig.app.json",
             "inlineStyleLanguage": "scss",
             "assets": [
+              "public/favicon.ico",
+              "public",
               {
                 "glob": "**/*",
-                "input": "public",
-                "output": "assets/"
+                "input": "node_modules/ngx-scanner-qrcode/wasm/",
+                "output": "assets/wasm/"
               }
             ],
             "styles": [
