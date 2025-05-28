@@ -10,6 +10,8 @@ import {
 } from '@stripe/stripe-js';
 import { HttpClient } from '@angular/common/http';
 import { ChangeDetectorRef } from '@angular/core';
+import { PDFDocument } from 'pdf-lib';
+import { firstValueFrom } from 'rxjs';
 
 @Component({
   selector: 'app-event-card',
@@ -87,22 +89,38 @@ export class EventCardComponent implements OnDestroy {
 
   }
 
-  onDownloadPdf(): void {
-  if (!this.event?.tickets?.length) {
+  async onDownloadPdf(): Promise<void> {
+  const tickets = this.event?.tickets ?? [];
+  if (tickets.length === 0) {
     return;
   }
 
-  this.event.tickets.forEach((ticket: any, index: any) => {
+  // Single ticket: just download it
+  if (tickets.length === 1) {
+    const ticket = tickets[0];
     const url = `https://studivent-dhbw.de/api/tickets/${ticket.id}/pdf`;
-    console.log(url)
-    this.pdfService.downloadPdf(url).subscribe(blob => {
-      // Name the file using the event title and ticket index (or ticket.id if you have one)
-      const filename = `${this.event.title}-ticket-${index + 1}.pdf`;
-      this.pdfService.savePdf(blob, filename);
-    }, err => {
-      console.error(`Error downloading ticket #${index + 1}`, err);
-    });
-  });
+    const blob = await firstValueFrom(this.pdfService.downloadPdf(url));
+    this.pdfService.savePdf(blob, `${this.event.title}-ticket-1.pdf`);
+    return;
+  }
+
+  // Multiple tickets: merge into one PDF
+  const mergedPdf = await PDFDocument.create();
+
+  for (let i = 0; i < tickets.length; i++) {
+    const ticket = tickets[i];
+    const url = `https://studivent-dhbw.de/api/tickets/${ticket.id}/pdf`;
+    const blob = await firstValueFrom(this.pdfService.downloadPdf(url));
+    const arrayBuffer = await blob.arrayBuffer();
+
+    const donorPdf = await PDFDocument.load(arrayBuffer);
+    const pages = await mergedPdf.copyPages(donorPdf, donorPdf.getPageIndices());
+    pages.forEach(page => mergedPdf.addPage(page));
+  }
+
+  const mergedBytes = await mergedPdf.save();
+  const mergedBlob = new Blob([mergedBytes], { type: 'application/pdf' });
+  this.pdfService.savePdf(mergedBlob, `${this.event.title}-tickets.pdf`);
 }
 
 
