@@ -30,7 +30,7 @@ export class AuthService {
       email: user.email,
     };
 
-    res.redirect('/event');
+    res.redirect('/');
   }
 
   handleLogout(req: Request, res: Response): void {
