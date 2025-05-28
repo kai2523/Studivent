@@ -13,6 +13,7 @@ import { TicketService } from '../ticket/ticket.service';
 import { UserService } from '../user/user.service';
 import { EventService } from '../event/event.service';
 import { SessionGuard } from '../auth/auth.guard';
+import { ApiKeyGuard } from '../auth/api-key.guard';
 import { CreateIntentDto } from './dto/create-intent.dto';
 import Stripe from 'stripe';
 
@@ -27,7 +28,7 @@ export class PaymentController {
     private readonly eventService: EventService,
   ) {}
 
-  @UseGuards(SessionGuard)
+  @UseGuards(ApiKeyGuard)
   @Post('create-intent')
   async createIntent(
     @Body() dto: CreateIntentDto,
