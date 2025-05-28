@@ -1,43 +1,62 @@
 <div class="container py-4">
-  <!-- Back button -->
-  <app-page-header [text]="'Hi, ' + user.username.split(' ')[0] + '!'"></app-page-header>
+  <!-- Page header always visible -->
+  <app-page-header
+    [text]="'Hi, ' + (user?.firstName ?? 'Gast')"
+  ></app-page-header>
 
-  <!-- Profile icon -->
-  <div class="text-center my-3">
-    <i class="fas fa-user-circle fa-6x"></i>
-    <div class="text-muted small mt-2">{{ user.email }}</div>
+  <!-- 1) Loading spinner -->
+  <div *ngIf="loading" class="d-flex justify-content-center my-5">
+    <div class="spinner-border" role="status">
+      <span class="visually-hidden">Lädt…</span>
+    </div>
   </div>
 
-  <!-- Links -->
-  <ul class="list-group mb-3">
-    <li class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
-      <span>E-Mail-Updates</span>
-      <div class="form-check form-switch m-0">
-        <input
-          class="form-check-input"
-          type="checkbox"
-          id="emailUpdates"
-          [(ngModel)]="emailUpdates"
-          (change)="toggleEmailUpdates()"
-        />
+  <!-- 2) Error message -->
+  <div *ngIf="!loading && error" class="alert alert-danger text-center">
+    {{ error }}
+  </div>
+
+  <!-- 3) Profile content -->
+  <ng-container *ngIf="!loading && !error">
+    <!-- Profile icon & email -->
+    <div class="text-center my-3">
+      <i class="fas fa-user-circle fa-6x"></i>
+      <div class="text-muted small mt-2">
+        {{ user?.email }}
       </div>
-    </li>
-      <a class="list-group-item list-group-item-action d-flex justify-content-between align-items-center" (click)="goTo('privacy')">
+    </div>
+
+    
+  </ng-container>
+
+  <!-- Links -->
+    <ul class="list-group mb-3">
+      <a
+        class="list-group-item list-group-item-action d-flex justify-content-between align-items-center"
+        (click)="goTo('privacy')"
+      >
         Datenschutzinformationen
         <i class="fas fa-chevron-right"></i>
       </a>
-    
-      <a routerLink="/help" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center" (click)="goTo('help')">
-        Hilfe
-        <i class="fas fa-chevron-right"></i>
-      </a>
-    
-      <a routerLink="/terms-of-service" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center" (click)="goTo('terms-of-service')">
+      <a
+        class="list-group-item list-group-item-action d-flex justify-content-between align-items-center"
+        (click)="goTo('terms-of-service')"
+      >
         Nutzungsbedingungen
         <i class="fas fa-chevron-right"></i>
       </a>
-    
-      <a *ngIf="isAdmin" routerLink="/qr-code" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center" (click)="goTo('qr-code')">
+      <a
+        class="list-group-item list-group-item-action d-flex justify-content-between align-items-center"
+        (click)="goTo('impressum')"
+      >
+        Impressum
+        <i class="fas fa-chevron-right"></i>
+      </a>
+      <a
+        *ngIf="user && user.isAdmin"
+        class="list-group-item list-group-item-action d-flex justify-content-between align-items-center"
+        (click)="goTo('qr-code')"
+      >
         <div class="d-flex align-items-center">
           <i class="fas fa-qrcode me-2"></i>
           <span>QR-Code Scan</span>
@@ -45,25 +64,11 @@
         <i class="fas fa-chevron-right"></i>
       </a>
     </ul>
-  <div class="container w-100 d-flex justify-content-center">
-    
-  <!-- Logoff button -->
-  <button class="btn btn-primary" (click)="logout()">
-    <i class="fas fa-sign-out-alt"></i> Ausloggen
-  </button>
 
-  </div>
-
-  <!-- Debug admin toggle -->
-  <div class="form-check form-switch mt-4">
-    <input
-      class="form-check-input"
-      type="checkbox"
-      id="adminToggle"
-      [(ngModel)]="isAdmin"
-    />
-    <label class="form-check-label" for="adminToggle">
-      Admin (debug)
-    </label>
-  </div>
+    <!-- Logout button -->
+    <div class="d-flex justify-content-center mb-4">
+      <button class="btn btn-primary" (click)="onLogout()" disabled="true">
+        <i class="fas fa-sign-out-alt me-1"></i> Ausloggen
+      </button>
+    </div>
 </div>
