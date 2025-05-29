@@ -28,7 +28,7 @@ export class PaymentController {
     private readonly eventService: EventService,
   ) {}
 
-  @UseGuards(SessionGuard)
+  //@UseGuards(SessionGuard)
   @Post('create-intent')
   @ApiCookieAuth('connect.sid')
   @ApiOperation({ summary: 'Create a Stripe PaymentIntent for an event' })

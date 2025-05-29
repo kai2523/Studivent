@@ -30,7 +30,7 @@ import {
 
 @ApiCookieAuth('connect.sid')
 @ApiTags('Events')
-@UseGuards(SessionGuard)
+//@UseGuards(SessionGuard)
 @Controller('events')
 export class EventController {
   constructor(private eventService: EventService) {}
