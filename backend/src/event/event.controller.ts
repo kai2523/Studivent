@@ -134,7 +134,7 @@ export class EventController {
     },
   })
   findAll(@Req() req: Request) {
-    const userId = req.session?.user?.userId;
+    const userId = 1; //req.session?.user?.userId;
 
     if (!userId) {
       throw new ForbiddenException('User not logged in');
