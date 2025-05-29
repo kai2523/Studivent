@@ -51,7 +51,7 @@ model Ticket {
   code              String    @unique @default(uuid())
   validatedAt       DateTime? @map("validated_at")
   event             Event     @relation(fields: [eventId], references: [id], onDelete: Cascade)
-  user              User      @relation(fields: [userId], references: [id])
+  user              User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([eventId])
   @@index([userId])
