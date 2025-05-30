@@ -77,7 +77,7 @@ export class PaymentController {
     },
   })
   async createIntent(@Body() dto: CreateIntentDto, @Req() req: Request) {
-    const userId = req.session?.user?.userId as number;
+    const userId = 1; //req.session?.user?.userId as number;
     const user = await this.userService.getUserById(userId);
 
     const event = await this.eventService.findOne(dto.eventId);
