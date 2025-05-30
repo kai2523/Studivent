@@ -10,20 +10,29 @@ export class AuthService {
   async handleLogin(req: Request & { shib: ShibData }, res: Response): Promise<void> {
     const { email, givenName, surname, persistentId } = req.shib;
 
-    const user = await this.prisma.user.upsert({
+    let user = await this.prisma.user.findUnique({
       where: { persistentId },
-      update: {
-        email,
-        firstName: givenName,
-        lastName: surname,
-      },
-      create: {
-        persistentId,
+    });
+
+    if (user) {
+      user = await this.prisma.user.update({
+      where: { id: user.id },
+      data: {
         email,
         firstName: givenName,
         lastName: surname,
       },
     });
+    } else {
+      user = await this.prisma.user.create({
+        data: {
+          persistentId,
+          email,
+          firstName: givenName,
+          lastName: surname,
+        },
+      });
+    }
 
     req.session.user = {
       userId: user.id,

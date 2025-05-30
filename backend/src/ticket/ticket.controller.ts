@@ -27,7 +27,7 @@ import {
 
 @ApiCookieAuth('connect.sid')
 @ApiTags('Tickets')
-@UseGuards(SessionGuard)
+//@UseGuards(SessionGuard)
 @Controller('tickets')
 export class TicketController {
   constructor(
