@@ -12,7 +12,7 @@ import { PdfDownloadService } from '../../services/pdf-download.service';
 import { Router } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 import { loadStripe, Stripe, StripeElements, StripeCardElement } from '@stripe/stripe-js';
-import { PDFDocument } from 'pdf-lib';
+import { PDFDocument, PDFPage } from 'pdf-lib';
 import { firstValueFrom } from 'rxjs';
 
 @Component({
@@ -102,34 +102,54 @@ export class EventCardComponent implements OnDestroy {
     }
   }
 
-  async onDownloadPdf(): Promise<void> {
-    const tickets = this.event?.tickets ?? [];
-    if (tickets.length === 0) {
-      return;
-    }
-
-    if (tickets.length === 1) {
-      const ticket = tickets[0];
-      const url = `https://studivent-dhbw.de/api/tickets/${ticket.id}/pdf`;
-      const blob = await firstValueFrom(this.pdfService.downloadPdf(url));
-      this.pdfService.savePdf(blob, `${this.event.title}-ticket-1.pdf`);
-      return;
-    }
-
-    const mergedPdf = await PDFDocument.create();
-    for (let i = 0; i < tickets.length; i++) {
-      const ticket = tickets[i];
-      const url = `https://studivent-dhbw.de/api/tickets/${ticket.id}/pdf`;
-      const blob = await firstValueFrom(this.pdfService.downloadPdf(url));
-      const arrayBuffer = await blob.arrayBuffer();
-      const donorPdf = await PDFDocument.load(arrayBuffer);
-      const pages = await mergedPdf.copyPages(donorPdf, donorPdf.getPageIndices());
-      pages.forEach(page => mergedPdf.addPage(page));
-    }
-    const mergedBytes = await mergedPdf.save();
-    const mergedBlob = new Blob([mergedBytes], { type: 'application/pdf' });
-    this.pdfService.savePdf(mergedBlob, `${this.event.title}-tickets.pdf`);
+async onDownloadPdf(): Promise<void> {
+  const tickets = this.event?.tickets ?? [];
+  if (tickets.length === 0) {
+    return;
   }
+
+  // Single ticket: just download & save
+  if (tickets.length === 1) {
+    const ticket = tickets[0];
+    const url = `https://studivent-dhbw.de/api/tickets/${ticket.id}/pdf`;
+    const blob = await firstValueFrom(this.pdfService.downloadPdf(url));
+    this.pdfService.savePdf(blob, `${this.event.title}-ticket-1.pdf`);
+    return;
+  }
+
+  // Multiple tickets: merge into one PDF
+  const mergedPdf: PDFDocument = await PDFDocument.create();
+
+  for (let i = 0; i < tickets.length; i++) {
+    const ticket = tickets[i];
+    const url = `https://studivent-dhbw.de/api/tickets/${ticket.id}/pdf`;
+
+    // download each ticket PDF
+    const blob = await firstValueFrom(this.pdfService.downloadPdf(url));
+    const arrayBuffer = await blob.arrayBuffer();
+    const donorPdf: PDFDocument = await PDFDocument.load(arrayBuffer);
+
+    // copy all pages from the donor into the merged
+    const pages: PDFPage[] = await mergedPdf.copyPages(
+      donorPdf,
+      donorPdf.getPageIndices()
+    );
+
+    // now page is correctly typed as PDFPage
+    pages.forEach((page: PDFPage) => {
+      mergedPdf.addPage(page);
+    });
+  }
+
+  // finalize and save
+  const mergedBytes = await mergedPdf.save();
+  const mergedBlob = new Blob([mergedBytes], { type: 'application/pdf' });
+  this.pdfService.savePdf(
+    mergedBlob,
+    `${this.event.title}-tickets.pdf`
+  );
+}
+
 
   initPayment(): void {
     this.http
