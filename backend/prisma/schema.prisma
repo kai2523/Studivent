@@ -7,6 +7,18 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model User {
+  id            Int      @id @default(autoincrement())
+  persistentId  String   @unique @map("persistent_id") 
+  email         String   @unique
+  firstName     String   @map("first_name")
+  lastName      String   @map("last_name")
+  isAdmin       Boolean  @default(false)
+  tickets       Ticket[]
+
+  @@map("users")
+}
+
 model Event {
   id           Int      @id @default(autoincrement())
   createdAt    DateTime @default(now()) @map("created_at")
@@ -18,6 +30,7 @@ model Event {
   imageUrl     String?  @map("image_url")
   banner       String?  @db.Uuid
   totalTickets Int      @map("total_tickets")
+  priceCents   Int      @map("price_cents")
   locationId   Int      @map("location_id")
   location     Location @relation(fields: [locationId], references: [id])
   tickets      Ticket[]
@@ -26,18 +39,22 @@ model Event {
 }
 
 model Ticket {
-  id          Int       @id @default(autoincrement())
-  createdAt   DateTime  @default(now()) @map("created_at")
-  ownerEmail  String    @map("owner_email")
-  bookedAt    DateTime  @default(now()) @map("booked_at")
-  qrCodePath  String?   @map("qr_code_path")
-  pdfPath     String?   @map("pdf_path")
-  eventId     Int       @map("event_id")
-  code        String    @unique @default(uuid())
-  validatedAt DateTime? @map("validated_at")
-  event       Event     @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  id                Int       @id @default(autoincrement())
+  createdAt         DateTime  @default(now()) @map("created_at")
+  ownerEmail        String    @map("owner_email")
+  bookedAt          DateTime  @default(now()) @map("booked_at")
+  qrCodePath        String?   @map("qr_code_path")
+  pdfPath           String?   @map("pdf_path")
+  eventId           Int       @map("event_id")
+  userId            Int       @map("user_id")
+  paymentIntentId   String    @map("payment_intent_id") 
+  code              String    @unique @default(uuid())
+  validatedAt       DateTime? @map("validated_at")
+  event             Event     @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  user              User      @relation(fields: [userId], references: [id])
 
   @@index([eventId])
+  @@index([userId])
   @@map("tickets")
 }
 

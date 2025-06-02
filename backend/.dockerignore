@@ -1,0 +1,15 @@
+node_modules
+dist
+ecosystem.config.js
+
+*.log
+*.md
+ERD.svg
+
+.git
+.gitignore
+.env
+
+.DS_Store
+*.swp
+*.swo

@@ -1,0 +1,26 @@
+services:
+  backend:
+    build: ./backend
+    image: studivent-backend
+    container_name: backend
+    ports:
+      - "3000:3000"
+    env_file: .env
+    depends_on:
+      - redis
+    restart: unless-stopped
+  
+  directus:
+    build: ./cms
+    image: studivent-directus
+    container_name: directus
+    ports:
+      - 8055:8055
+    env_file:
+      - ./cms/.env
+    restart: unless-stopped
+
+  redis:
+    image: redis:8
+    container_name: redis
+    restart: unless-stopped

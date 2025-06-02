@@ -9,5 +9,6 @@ import { StorageModule } from '../infra/storage/storage.module';
   imports: [QrModule, PdfModule, StorageModule],
   controllers: [TicketController],
   providers: [TicketService],
+  exports: [TicketService],
 })
 export class TicketModule {}

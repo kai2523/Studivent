@@ -1,6 +1,13 @@
 #!/bin/bash
 set -euo pipefail
 
+# Ganz am Anfang des Skripts
+export NVM_DIR="$HOME/.nvm"
+# lade nvm
+[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+# standard Node-Version aktivieren
+nvm use 22.15.0
+
 echo "====== START: start_server.sh ======"
 echo "Working dir: $(pwd)"
 
@@ -10,66 +17,18 @@ sudo mkdir -p /var/www/Studivent
 sudo chown -R ubuntu:ubuntu /var/www/Studivent
 cd /var/www/Studivent
 
-
 # Zurück ins Root Verzeichnis
 cd /var/www/Studivent
 
-# ────────────── BACKEND ──────────────
+# ────────────── BACKEND & CMS ──────────────
 
-echo "--- Backend: /var/www/Studivent/backend ---"
-cd backend
-echo "Working dir: $(pwd)"
+sudo docker compose down 
 
-# Dev+Build → Prod-only
-echo "Installing dev dependencies, building, then pruning to production…"
-/home/ubuntu/.nvm/versions/node/v22.15.0/bin/yarn install
-/home/ubuntu/.nvm/versions/node/v22.15.0/bin/yarn build
+sudo docker compose build backend
 
-BACKEND_APP="backend-api"
+sudo docker compose up -d
 
-if pm2 list | grep -q "$BACKEND_APP"; then
-  echo "Reload bestehender PM2-Prozess ($BACKEND_APP)..."
-  pm2 reload ecosystem.config.js --only "$BACKEND_APP"
-else
-  echo "Starte neue PM2-App ($BACKEND_APP) mit ecosystem.config.js..."
-  pm2 start ecosystem.config.js
-fi
-
-# ────────────── CMS ──────────────
-
-cd /var/www/Studivent/cms
-echo "Working directory: $(pwd)"
-
-CMS_APP="cms-directus"
-
-echo "🔧 Installing CMS dependencies…"
-npm install
-
-echo "🔧 Installing extension dependencies…"
-EXTENSIONS_PATH="./extensions"
-if [ -d "$EXTENSIONS_PATH" ]; then
-  for EXT in "$EXTENSIONS_PATH"/*; do
-    if [ -f "$EXT/package.json" ]; then
-      echo "📦 Installing in: $EXT"
-      cd "$EXT"
-      npm install
-      npm run build
-      cd - > /dev/null
-    fi
-  done
-else
-  echo "⚠️ No extensions directory found"
-fi
-
-npx directus bootstrap
-
-if pm2 list | grep -q "$CMS_APP"; then
-  echo "Reloading existing PM2 app ($CMS_APP)…"
-  pm2 reload ecosystem.config.js --only "$CMS_APP"
-else
-  echo "Starting PM2 app ($CMS_APP)…"
-  pm2 start ecosystem.config.js --only "$CMS_APP"
-fi
+sudo docker image prune -f
 
 # ────────────── FRONTEND ──────────────
 

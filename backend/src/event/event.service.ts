@@ -1,8 +1,4 @@
-import {
-  BadRequestException,
-  Injectable,
-  NotFoundException,
-} from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateEventDto, EditEventDto } from './dto';
 import { StorageService } from '../infra/storage/storage.interface';
@@ -60,6 +56,7 @@ export class EventService {
         date: dto.date,
         contact: dto.contact,
         totalTickets: dto.totalTickets,
+        priceCents: dto.priceCents,
 
         location: {
           connectOrCreate: {
@@ -78,10 +75,7 @@ export class EventService {
       include: { location: true },
     });
 
-    const { uuid: bannerUuid, key: imagePath } = await this.uploadBanner(
-      event.id,
-      dto.imageUrl,
-    );
+    const { uuid: bannerUuid, key: imagePath } = await this.uploadBanner(event.id, dto.imageUrl);
 
     return this.prisma.event.update({
       where: { id: event.id },
@@ -93,18 +87,21 @@ export class EventService {
         date: true,
         contact: true,
         totalTickets: true,
+        priceCents: true,
         location: true,
       },
     });
   }
 
-  async findAll() {
+  async findAll(userId: number) {
     const events = await this.prisma.event.findMany({
       include: { location: true, tickets: true },
     });
 
     await Promise.all(
       events.map(async (e) => {
+        e.tickets = e.tickets.filter((ticket) => ticket.userId === userId);
+
         if (e.imageUrl) {
           e.imageUrl = await this.storage.getSignedUrl(e.imageUrl, 60 * 15);
         }
@@ -160,14 +157,8 @@ export class EventService {
     if (bannerUuid) data.banner = bannerUuid;
     if (imagePath) data.imageUrl = imagePath;
 
-    if (
-      dto.location?.name &&
-      dto.location.address &&
-      dto.location.city &&
-      dto.location.country
-    ) {
-      const { name, address, city, country, latitude, longitude } =
-        dto.location;
+    if (dto.location?.name && dto.location.address && dto.location.city && dto.location.country) {
+      const { name, address, city, country, latitude, longitude } = dto.location;
 
       Object.assign(data, {
         location: {
@@ -191,6 +182,7 @@ export class EventService {
         date: true,
         contact: true,
         totalTickets: true,
+        priceCents: true,
         imageUrl: true,
         location: true,
       },
@@ -235,21 +227,17 @@ export class EventService {
 
       return true;
     } catch (error) {
-        console.warn('Error during event deletion:', error);
+      console.warn('Error during event deletion:', error);
       return false;
     }
   }
 
-  async findTicketsForEvent(
-    eventId: number,
-    { page, size }: { page: number; size: number },
-  ) {
+  async findTicketsForEvent(eventId: number, { page, size }: { page: number; size: number }) {
     const eventExists = await this.prisma.event.findUnique({
       where: { id: eventId },
       select: { id: true },
     });
-    if (!eventExists)
-      throw new NotFoundException(`Event #${eventId} not found`);
+    if (!eventExists) throw new NotFoundException(`Event #${eventId} not found`);
 
     return this.prisma.ticket.findMany({
       where: { eventId },
