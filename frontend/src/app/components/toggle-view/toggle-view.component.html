@@ -2,13 +2,14 @@
   <div class="row w-100 p-0">
     <div class="col d-flex justify-content-start p-0">
       <ul
-        class="nav nav-pills d-inline-flex p-1 border border-secondary border-1 rounded w-auto bg-white"
-        style="border-radius: 12px !important"
+        class="nav nav-pills d-inline-flex border border-secondary border-1 rounded w-auto bg-white"
+        style="border-radius: 10px !important; padding: 2px!important"
         role="tablist"
       >
         <li class="nav-item text-center" (click)="onTabClick(0)">
           <button
             class="nav-link rounded-3 px-3 py-1"
+            style="color: black;"
             [class.active]="activeTab === 0"
           >
             Alle
@@ -17,6 +18,7 @@
         <li class="nav-item text-center" (click)="onTabClick(1)">
           <button
             class="nav-link rounded-3 px-3 py-1"
+            style="color: black;"
             [class.active]="activeTab === 1"
           >
             Gebucht
