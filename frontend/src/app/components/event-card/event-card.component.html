@@ -1,10 +1,8 @@
-<!-- event-card.component.html -->
-
 <!-- Preview Mode -->
 <div
   class="card p-0 my-2 border-0"
   *ngIf="!isDetailMode"
-  style="border-radius:12px;cursor:pointer;"
+  style="border-radius:12px; cursor:pointer;"
 >
   <img
     [src]="event.imageUrl"
@@ -15,28 +13,29 @@
   <div class="card-body bg-secondary" style="border-radius:0 0 12px 12px;">
     <h5 class="card-title d-flex align-items-center">
       {{ event.title }}
-      <ng-container *ngIf="event.tickets?.length > 0">
-        <div class="position-relative ms-2">
-          <i
-            class="fas fa-download"
-            style="cursor:pointer"
-            (click)="onDownloadPdf()"
-          ></i>
+      <ng-container *ngIf="event.tickets?.length > 0" >
+        <div class="position-relative d-inline-block" (click)="onDownloadPdf()">
+          <img
+            src="assets/import_light.svg"
+            alt="Download"
+            class="ms-3"
+            style="cursor: pointer; height: 1.5rem;"
+            
+          />
           <span
-            class="badge bg-primary position-absolute top-0 start-100 translate-middle"
-            >{{ event.tickets.length }}</span
+            class="position-absolute top-0 mt-2 start-100 translate-middle badge"
+            style="font-size: 0.75rem; color: black"
           >
+            {{ event.tickets.length }}
+          </span>
         </div>
       </ng-container>
     </h5>
+
     <p class="card-text m-0 d-flex align-items-center flex-wrap gap-1">
       <img src="assets/pin_light.svg" alt="Location" style="height: 1em;" />
-
       <a
-        [href]="'https://www.google.com/maps/search/?api=1&query=' +
-          event.location.latitude +
-          ',' +
-          event.location.longitude"
+        [href]="'https://www.google.com/maps/search/?api=1&query=' + event.location.latitude + ',' + event.location.longitude"
         target="_blank"
         rel="noopener noreferrer"
         class="text-reset text-decoration-none"
@@ -45,197 +44,241 @@
       </a>
 
       <span class="d-flex align-items-center ms-3">
-        <img src="assets/calendar_light.svg" alt="Date" style="height: 1em;" class="me-1" />
-        {{ event.date | date:'dd.MM.yyyy' }}
+        <img
+          src="assets/calendar_light.svg"
+          alt="Date"
+          style="height: 1em;"
+          class="me-1"
+        />
+        {{ event.date | date: 'dd.MM.yyyy' }}
       </span>
     </p>
+
     <button class="btn btn-primary w-100 mt-2" (click)="toggleDetailMode()">
       Details →
     </button>
   </div>
 </div>
 
-<!-- Detail Mode (Fullscreen Overlay) -->
+<!-- Detail Mode -->
 <div
   class="position-fixed top-0 start-0 w-100 h-100 bg-white overflow-auto"
   *ngIf="isDetailMode"
   style="z-index:1050;"
 >
+  <!-- Close Button -->
   <p
     class="position-absolute top-0 end-0 m-3 text-white"
     (click)="toggleDetailMode()"
-    style="
-      font-size: 2rem;
-      cursor: pointer;
-    "
+    style="font-size: 2rem; cursor: pointer;"
     aria-label="Close"
   >
     <img src="assets/dell_square.svg" alt="Close" style="height: 2rem;" />
   </p>
+
   <img [src]="event.imageUrl" class="img-fluid" alt="Event image" />
+
   <div class="container p-4">
     <h4>
-      {{ event.title }}<ng-container *ngIf="event.tickets?.length > 0">
-        
-        <!-- make the parent position-relative -->
-        <div class="position-relative d-inline-block">
+      {{ event.title }}
+      <ng-container *ngIf="event.tickets?.length > 0">
+        <div class="position-relative d-inline-block" (click)="onDownloadPdf()">
           <img
             src="assets/import_light.svg"
             alt="Download"
             class="ms-3"
-            style="cursor: pointer; height: 1.25rem;"
-            (click)="onDownloadPdf()"
+            style="cursor: pointer; height: 1.5rem;"
           />
-          <!-- the badge -->
           <span
             class="position-absolute top-0 mt-2 start-100 translate-middle badge"
             style="font-size: 0.75rem; color: black"
           >
+            {{ event.tickets.length }}
+          </span>
         </div>
       </ng-container>
     </h4>
-      <!-- download all tickets + count -->
 
     <p class="mb-1 d-flex align-items-center flex-wrap gap-2">
-  <span class="d-flex align-items-center">
-    <img src="assets/calendar_light.svg" alt="Date" style="height: 1em;" class="me-1" />
-    {{ event.date | date: 'dd.MM.yyyy' }}
-  </span>
+      <span class="d-flex align-items-center">
+        <img
+          src="assets/calendar_light.svg"
+          alt="Date"
+          style="height: 1em;"
+          class="me-1"
+        />
+        {{ event.date | date: 'dd.MM.yyyy' }}
+      </span>
 
-  <span class="d-flex align-items-center">
-    <img src="assets/pin_light.svg" alt="Location" style="height: 1em;" class="me-1" />
-    <a
-      [href]="'https://www.google.com/maps/search/?api=1&query=' + event.location.latitude + ',' + event.location.longitude"
-      target="_blank"
-      rel="noopener noreferrer"
-      class="text-reset text-decoration-none"
-    >
-      {{ event.location.name }}
-    </a>
-  </span>
+      <span class="d-flex align-items-center">
+        <img
+          src="assets/pin_light.svg"
+          alt="Location"
+          style="height: 1em;"
+          class="me-1"
+        />
+        <a
+          [href]="'https://www.google.com/maps/search/?api=1&query=' + event.location.latitude + ',' + event.location.longitude"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="text-reset text-decoration-none"
+        >
+          {{ event.location.name }}
+        </a>
+      </span>
 
-  <span class="d-flex align-items-center">
-    <img src="assets/time_light.svg" alt="Time" style="height: 1em;" class="me-1" />
-    {{ event.date | date: 'HH:mm' }}
-  </span>
-</p>
-    <p>{{ event.description }}</p>
-    <p class="m-0">
-        <img src="assets/user.svg" alt="User" style="height: 1.25em;" class="me-1" /> {{ event.contact }}
+      <span class="d-flex align-items-center">
+        <img
+          src="assets/time_light.svg"
+          alt="Time"
+          style="height: 1em;"
+          class="me-1"
+        />
+        {{ event.date | date: 'HH:mm' }}
+      </span>
     </p>
+
+    <p>{{ event.description }}</p>
+
+    <p class="m-0">
+      <img
+        src="assets/user.svg"
+        alt="User"
+        style="height: 1.25em;"
+        class="me-1"
+      />
+      {{ event.contact }}
+    </p>
+
     <div class="mt-3">
       <small class="text-muted">Preis pro Ticket</small>
       <div class="fw-bold">{{ formattedPrice }}</div>
     </div>
 
+    <!-- Book Tickets Button -->
     <div class="mt-2 position-relative">
-  <!-- BOOK TICKETS BUTTON -->
-<button
-  class="btn btn-primary d-flex align-items-center justify-content-center gap-2 px-4 rounded-3"
-  style="
-    position: fixed;
-    bottom: 1.5rem;
-    left: 50%;
-    transform: translateX(-50%);
-    z-index: 1050;
-    white-space: nowrap;
-  "
-  (click)="toggleBooking()"
->
-  <img src="assets/credit_card.svg" alt="Buchen" style="height: 1.25rem; filter: brightness(0) invert(1);" />
-  {{ event.tickets.length > 0 ? 'Weitere Tickets buchen' : 'Eventtickets buchen' }}
-</button>
+      <button
+        class="btn btn-primary d-flex align-items-center justify-content-center gap-2 px-4 rounded-3"
+        style="
+          position: fixed;
+          bottom: 1.5rem;
+          left: 50%;
+          transform: translateX(-50%);
+          z-index: 1050;
+          white-space: nowrap;
+        "
+        (click)="toggleBooking()"
+      >
+        <img
+          src="assets/credit_card.svg"
+          alt="Buchen"
+          style="height: 1.25rem; filter: brightness(0) invert(1);"
+        />
+        {{ event.tickets.length > 0 ? 'Weitere Tickets buchen' : 'Eventtickets buchen' }}
+      </button>
+    </div>
 
- <!-- Booking Modal -->
-<ng-container *ngIf="bookingMode">
-  <div class="modal-backdrop fade show"></div>
-  <div
-    class="modal fade show"
-    tabindex="-1"
-    style="display:block;"
-    aria-modal="true"
-    role="dialog"
-  >
-    <div class="modal-dialog modal-dialog-centered">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title">Tickets buchen</h5>
-          <button
-            type="button"
-            class="btn-close"
-            aria-label="Close"
-            (click)="toggleBooking()"
-          ></button>
-        </div>
-        <div class="modal-body">
-          <div class="d-flex justify-content-between mb-3">
-            <div>
-              <small class="text-muted">Preis pro Ticket</small>
-              <div class="fw-bold">{{ formattedPrice }}</div>
+    <!-- Booking Modal -->
+    <ng-container *ngIf="bookingMode">
+      <div class="modal-backdrop fade show"></div>
+      <div
+        class="modal fade show"
+        tabindex="-1"
+        style="display:block;"
+        aria-modal="true"
+        role="dialog"
+      >
+        <div class="modal-dialog modal-dialog-centered">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title">Tickets buchen</h5>
+              <button
+                type="button"
+                class="btn-close"
+                aria-label="Close"
+                (click)="toggleBooking()"
+              ></button>
             </div>
-            <div>
-              <small class="text-muted">Gesamt</small>
-              <div class="fw-bold">{{ formattedTotal }}</div>
+            <div class="modal-body">
+              <div class="d-flex justify-content-between mb-3">
+                <div>
+                  <small class="text-muted">Preis pro Ticket</small>
+                  <div class="fw-bold">{{ formattedPrice }}</div>
+                </div>
+                <div>
+                  <small class="text-muted">Gesamt</small>
+                  <div class="fw-bold">{{ formattedTotal }}</div>
+                </div>
+              </div>
+
+              <div class="d-flex align-items-center justify-content-center mb-3">
+                <button
+                  class="btn btn-outline-secondary"
+                  (click)="decrement()"
+                  [disabled]="ticketCount <= 1"
+                >
+                  −
+                </button>
+                <span class="mx-4 fs-5">{{ ticketCount }}</span>
+                <button
+                  class="btn btn-outline-secondary"
+                  (click)="increment()"
+                  [disabled]="ticketCount >= maxTickets"
+                >
+                  +
+                </button>
+              </div>
+
+              <div *ngIf="!paymentMode">
+                <button
+                  class="btn btn-primary d-flex align-items-center justify-content-center gap-2 px-4 rounded-3 w-100"
+                  (click)="initPayment()"
+                >
+                  <img
+                    src="assets/credit_card.svg"
+                    alt="Buchen"
+                    style="height: 1.25rem; filter: brightness(0) invert(1);"
+                  />
+                  Weiter zu Stripe
+                </button>
+              </div>
+
+              <div *ngIf="paymentMode">
+                <div
+                  #cardInfo
+                  id="card-element"
+                  class="form-control mb-2"
+                ></div>
+                <div *ngIf="paymentError" class="alert alert-danger">
+                  {{ paymentError }}
+                </div>
+              </div>
+
+              <div *ngIf="paymentSuccess" class="text-center mt-3">
+                <i class="fas fa-check-circle fa-4x text-success"></i>
+                <h4 class="text-success mt-2">Zahlung erfolgreich!</h4>
+              </div>
+            </div>
+
+            <div class="modal-footer">
+              <button
+                *ngIf="paymentMode && !paymentSuccess"
+                class="btn btn-primary"
+                (click)="confirmPayment()"
+              >
+                Zahlung abschließen
+              </button>
+              <button
+                type="button"
+                class="btn btn-secondary"
+                (click)="toggleBooking()"
+              >
+                {{ paymentSuccess ? 'Schließen' : 'Abbrechen' }}
+              </button>
             </div>
           </div>
-          <div class="d-flex align-items-center justify-content-center mb-3">
-            <button
-              class="btn btn-outline-secondary"
-              (click)="decrement()"
-              [disabled]="ticketCount <= 1"
-            >
-              −
-            </button>
-            <span class="mx-4 fs-5">{{ ticketCount }}</span>
-            <button
-              class="btn btn-outline-secondary"
-              (click)="increment()"
-              [disabled]="ticketCount >= maxTickets"
-            >
-              +
-            </button>
-          </div>
-          <div *ngIf="!paymentMode">
-            <button
-              class="btn btn-primary d-flex align-items-center justify-content-center gap-2 px-4 rounded-3 w-100"
-              (click)="initPayment()"
-            >
-            <img src="assets/credit_card.svg" alt="Buchen" style="height: 1.25rem; filter: brightness(0) invert(1);" />
-            Weiter zu Stripe
-            </button>
-          </div>
-          <div *ngIf="paymentMode">
-            <div
-              #cardInfo
-              id="card-element"
-              class="form-control mb-2"
-            ></div>
-            <div *ngIf="paymentError" class="alert alert-danger">
-              {{ paymentError }}
-            </div>
-          </div>
-          <div *ngIf="paymentSuccess" class="text-center mt-3">
-            <i class="fas fa-check-circle fa-4x text-success"></i>
-            <h4 class="text-success mt-2">Zahlung erfolgreich!</h4>
-          </div>
-        </div>
-        <div class="modal-footer">
-          <button
-            *ngIf="paymentMode && !paymentSuccess"
-            class="btn btn-primary"
-            (click)="confirmPayment()"
-          >
-            Zahlung abschließen
-          </button>
-          <button
-            type="button"
-            class="btn btn-secondary"
-            (click)="toggleBooking()"
-          >
-            {{ paymentSuccess ? 'Schließen' : 'Abbrechen' }}
-          </button>
         </div>
       </div>
-    </div>
+    </ng-container>
   </div>
-</ng-container>
+</div>
